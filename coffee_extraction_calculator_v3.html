@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111">
+<title>커피 추출 계산기</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f4f4;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+main{max-width:560px;margin:auto;padding:18px 15px 40px}
+h1{font-size:23px;margin:5px 0 18px}
+.card{background:#fff;border-radius:17px;padding:18px;margin-bottom:13px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+label{display:block;font-size:13px;font-weight:700;margin:3px 0 7px}
+input,select{width:100%;height:49px;border:1px solid #d9d9d9;border-radius:11px;padding:0 12px;font-size:17px;background:#fff;outline:none}
+input:focus,select:focus{border-color:#777}
+.field{margin-bottom:13px}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.resultbox{border-radius:13px;background:#f1f1f1;padding:14px}
+.resultbox .label{font-size:12px;color:#666}
+.resultbox .value{font-size:25px;font-weight:750;margin-top:5px}
+button{width:100%;height:50px;border:0;border-radius:11px;background:#111;color:#fff;font-size:17px;font-weight:700;margin-top:2px}
+.guide{margin-top:14px;padding:13px 14px;border-radius:12px;background:#f7f7f7;font-size:13px;line-height:1.65}
+.ratio-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.badge{font-weight:750}
+.ok{color:#147a42}
+.high{color:#c53b30}
+.low{color:#2368b2}
+.neutral{color:#666}
+.tdsbar{position:relative;height:34px;margin:13px 4px 3px}
+.track{position:absolute;left:0;right:0;top:14px;height:6px;border-radius:4px;background:#ddd}
+.range-fill{position:absolute;top:14px;height:6px;border-radius:4px;background:#bbb}
+.marker{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:19px;line-height:20px}
+.marker span{display:block;font-size:11px;white-space:nowrap;margin-top:1px}
+.scale{display:flex;justify-content:space-between;font-size:11px;color:#777}
+.tds-status{font-weight:700;margin-top:9px}
+.small{font-size:12px;color:#777;line-height:1.55;margin-top:9px}
+</style>
+</head>
+<body>
+<main>
+<h1>☕ 커피 추출 계산기</h1>
+
+<section class="card">
+  <div class="field">
+    <label for="type">종류</label>
+    <select id="type">
+      <option value="espresso">에스프레소</option>
+      <option value="ristretto">리스트레또</option>
+      <option value="lungo">룽고</option>
+      <option value="brewing">브루잉</option>
+    </select>
+  </div>
+
+  <div class="grid">
+    <div class="field">
+      <label for="dose">도징량 (g)</label>
+      <input id="dose" type="number" inputmode="decimal" step="0.1" placeholder="예: 18">
+    </div>
+    <div class="field">
+      <label for="yield">추출량 (g)</label>
+      <input id="yield" type="number" inputmode="decimal" step="0.1" placeholder="예: 36">
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="field">
+      <label for="time">추출시간 (초)</label>
+      <input id="time" type="number" inputmode="decimal" step="1" placeholder="예: 26">
+    </div>
+    <div class="field">
+      <label for="tds">TDS (%)</label>
+      <input id="tds" type="number" inputmode="decimal" step="0.01" placeholder="예: 9.50">
+    </div>
+  </div>
+
+  <div id="ratioGuide" class="guide">
+    <div class="ratio-row">
+      <span>권장 추출 비율</span>
+      <span class="badge" id="ratioText">에스프레소 1 : 2</span>
+    </div>
+    <div id="ratioStatus" class="small">도징량과 추출량을 입력하면 범위를 표시합니다.</div>
+  </div>
+
+  <button id="calcBtn" type="button">계산하기</button>
+</section>
+
+<section class="card">
+  <div class="result">
+    <div class="resultbox">
+      <div class="label">추출수율 (Extraction Yield)</div>
+      <div class="value" id="ey">—</div>
+    </div>
+    <div class="resultbox">
+      <div class="label">EBF</div>
+      <div class="value" id="ebf">—</div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <div style="font-weight:750">TDS 기준 가이드</div>
+  <div class="tdsbar">
+    <div class="track"></div>
+    <div class="range-fill" id="rangeFill"></div>
+    <div class="marker" id="marker">•<span id="markerLabel"></span></div>
+  </div>
+  <div class="scale"><span id="minScale">0%</span><span id="maxScale">12%</span></div>
+  <div class="tds-status" id="tdsStatus">TDS를 입력하면 기준 범위를 표시합니다.</div>
+  <div class="small" id="tdsReference">에스프레소 기준: 8~11%</div>
+</section>
+
+<section class="card">
+  <div style="font-weight:750;margin-bottom:8px">현재 기준값</div>
+  <div class="small">에스프레소 TDS: 8~11%</div>
+  <div class="small">브루잉 커피 TDS: 1.15~1.45%</div>
+  <div class="small">추출 비율: 에스프레소 1:2 · 리스트레또 1:1 · 룽고 1:3</div>
+</section>
+</main>
+
+<script>
+const type = document.getElementById('type');
+const dose = document.getElementById('dose');
+const yieldInput = document.getElementById('yield');
+const tds = document.getElementById('tds');
+
+const types = {
+  espresso:{name:'에스프레소', ratio:2, min:1.8, max:2.2, tmin:8, tmax:11},
+  ristretto:{name:'리스트레또', ratio:1, min:0.9, max:1.1, tmin:8, tmax:11},
+  lungo:{name:'룽고', ratio:3, min:2.7, max:3.3, tmin:8, tmax:11},
+  brewing:{name:'브루잉', ratio:null, min:null, max:null, tmin:1.15, tmax:1.45}
+};
+
+function updateGuides(){
+  const cfg = types[type.value];
+  document.getElementById('ratioText').textContent =
+    cfg.ratio ? `${cfg.name} 1 : ${cfg.ratio}` : '브루잉 커피';
+
+  const d=parseFloat(dose.value), y=parseFloat(yieldInput.value);
+  const ratioStatus=document.getElementById('ratioStatus');
+
+  if(cfg.ratio && d>0 && y>0){
+    const ratio=y/d;
+    const pct=(ratio-cfg.min)/(cfg.max-cfg.min)*100;
+    if(ratio>=cfg.min && ratio<=cfg.max){
+      ratioStatus.className='small ok';
+      ratioStatus.textContent=`현재 추출 비율 1 : ${ratio.toFixed(2)}  ✓ 권장 범위 안`;
+    }else if(ratio<cfg.min){
+      ratioStatus.className='small low';
+      ratioStatus.textContent=`현재 추출 비율 1 : ${ratio.toFixed(2)}  ↓ 기준보다 낮음`;
+    }else{
+      ratioStatus.className='small high';
+      ratioStatus.textContent=`현재 추출 비율 1 : ${ratio.toFixed(2)}  ↑ 기준보다 높음`;
+    }
+  }else{
+    ratioStatus.className='small';
+    ratioStatus.textContent=cfg.ratio ? '도징량과 추출량을 입력하면 범위를 표시합니다.' : '브루잉은 추출 비율 가이드를 적용하지 않습니다.';
+  }
+
+  const tv=parseFloat(tds.value);
+  const min=cfg.tmin,max=cfg.tmax;
+  const lo=Math.max(0,min-(max-min)*2), hi=max+(max-min)*2;
+  const pos=Math.max(0,Math.min(100,(tv-lo)/(hi-lo)*100));
+  const minPos=(min-lo)/(hi-lo)*100, maxPos=(max-lo)/(hi-lo)*100;
+  document.getElementById('rangeFill').style.left=minPos+'%';
+  document.getElementById('rangeFill').style.width=(maxPos-minPos)+'%';
+  document.getElementById('marker').style.left=(isNaN(tv)?minPos:pos)+'%';
+  document.getElementById('markerLabel').textContent=isNaN(tv)?'기준':tv.toFixed(2)+'%';
+  document.getElementById('minScale').textContent=lo.toFixed(2)+'%';
+  document.getElementById('maxScale').textContent=hi.toFixed(2)+'%';
+  document.getElementById('tdsReference').textContent=`${cfg.name} TDS 기준: ${min}~${max}%`;
+
+  const status=document.getElementById('tdsStatus');
+  if(isNaN(tv)){
+    status.className='tds-status neutral';
+    status.textContent='TDS를 입력하면 기준 범위를 표시합니다.';
+  }else if(tv<min){
+    status.className='tds-status low';
+    status.textContent=`↓ ${min}%보다 낮습니다`;
+  }else if(tv>max){
+    status.className='tds-status high';
+    status.textContent=`↑ ${max}%보다 높습니다`;
+  }else{
+    status.className='tds-status ok';
+    status.textContent='✓ 기준 범위 안입니다';
+  }
+}
+
+function calculate(){
+  const d=parseFloat(dose.value), y=parseFloat(yieldInput.value), t=parseFloat(tds.value);
+  if(!(d>0) || !(y>0) || !(t>0)){
+    document.getElementById('ey').textContent='입력 필요';
+    document.getElementById('ebf').textContent='입력 필요';
+    updateGuides(); return;
+  }
+  document.getElementById('ey').textContent=(y*t/d).toFixed(2)+'%';
+  document.getElementById('ebf').textContent=(d/y*100).toFixed(2)+'%';
+  updateGuides();
+}
+[type,dose,yieldInput,tds].forEach(el=>el.addEventListener('input',updateGuides));
+type.addEventListener('change',updateGuides);
+document.getElementById('calcBtn').addEventListener('click', calculate);
+updateGuides();
+</script>
+</body>
+</html>
