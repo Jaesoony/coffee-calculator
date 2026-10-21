@@ -1,0 +1,52 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>로스팅 추출 계산기</title></head><body><main class="wrap wrap-flex"><div class="navback"><a href="index.html">← 계산기 선택</a></div><h1>🔥 로스팅 추출 계산기</h1>
+
+<!-- 입력 화면 -->
+<div id="inputView">
+<section class="card"><h2>기본 정보</h2>
+<div class="grid"><div class="field"><label for="agWB">Agtron WB</label><input id="agWB" type="number" inputmode="decimal" step="0.1" placeholder="예: 65"></div><div class="field"><label for="agRGB">Agtron RGB</label><input id="agRGB" type="number" inputmode="decimal" step="0.1" placeholder="예: 70"></div></div>
+<div class="grid"><div class="field"><label for="wIn">투입 무게 (g)</label><input id="wIn" type="number" inputmode="decimal" step="0.1" placeholder="예: 1000"></div><div class="field"><label for="wOut">배출 무게 (g)</label><input id="wOut" type="number" inputmode="decimal" step="0.1" placeholder="예: 850"></div></div>
+<div class="grid"><div class="field"><label for="inFire">투입 화력</label><input id="inFire" type="number" inputmode="decimal" step="any" placeholder="예: 5"></div><div class="field"><label for="inTemp">투입 온도 (°C)</label><input id="inTemp" type="number" inputmode="decimal" step="0.1" placeholder="예: 200"></div></div>
+</section>
+
+<section class="card"><h2>이벤트 시간 / 온도</h2>
+<div class="small" style="margin:-6px 0 12px">시간은 분:초로 입력해요. 숫자만 써도 됩니다. (830 → 8:30)</div>
+<div class="evhead"><span></span><span>시간</span><span>온도 (°C)</span></div>
+<div class="evrow"><label>Turning P</label><input id="tp_t" class="tin" inputmode="numeric" placeholder="1:30"><input id="tp_c" type="number" inputmode="decimal" step="0.1"></div>
+<div class="evrow"><label>Yellow P</label><input id="yp_t" class="tin" inputmode="numeric" placeholder="5:00"><input id="yp_c" type="number" inputmode="decimal" step="0.1"></div>
+<div class="evrow"><label>1st pop</label><input id="c1_t" class="tin" inputmode="numeric" placeholder="8:30"><input id="c1_c" type="number" inputmode="decimal" step="0.1"></div>
+<div class="evrow"><label>2nd pop</label><input id="c2_t" class="tin" inputmode="numeric" placeholder="(선택)"><input id="c2_c" type="number" inputmode="decimal" step="0.1"></div>
+<div class="evrow"><label>배출 Output</label><input id="out_t" class="tin" inputmode="numeric" placeholder="10:30"><input id="out_c" type="number" inputmode="decimal" step="0.1"></div>
+</section>
+
+<section class="card"><h2>1분 간격 기록</h2>
+<div class="small" style="margin:-6px 0 12px">ROR은 Drum 온도를 기준으로 계산해요.</div>
+<div id="rtable" class="rtable"></div>
+<div class="rowbtns"><button id="addRow" type="button">+ 1분 추가</button><button id="delRow" type="button">− 마지막 줄 삭제</button></div>
+</section>
+
+<div id="msg" class="input-alert high" hidden></div>
+<button id="calcBtn" type="button">결과보기</button>
+</div>
+
+<!-- 결과 화면 -->
+<div id="resultView" hidden>
+<div class="toolbar"><button id="backBtn" class="ghost" type="button">← 입력 수정</button><div class="seg" role="group" aria-label="보기 방식"><button id="modeScroll" type="button" aria-pressed="true">세로 스크롤</button><button id="modeSwipe" type="button" aria-pressed="false">가로 넘기기</button></div></div>
+
+<div id="pages" class="pages scroll">
+<div class="page" id="page1">
+<section class="card"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div></section>
+</div>
+<div class="page" id="page2">
+<section class="card"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출. 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</div></section>
+</div>
+<div class="page" id="page3">
+<section class="card"><h2>로스팅 결과</h2><div class="result three"><div class="resultbox"><div class="label">DT</div><div class="value" id="rDT">—</div></div><div class="resultbox"><div class="label">DTR</div><div class="value" id="rDTR">—</div></div><div class="resultbox"><div class="label">중량 손실률</div><div class="value" id="rLoss">—</div></div></div><div id="rNote" class="chart-note"></div></section>
+<section class="card"><h2>이벤트 요약</h2><div id="evTable"></div></section>
+<section class="card"><h2>계산식</h2><div class="formula"><div><strong>DT</strong> = 배출 시간 − 1차 크랙 시간</div><div><strong>DTR</strong> = DT ÷ 배출 시간 × 100</div><div><strong>중량 손실률</strong> = (투입 무게 − 배출 무게) ÷ 투입 무게 × 100</div><div><strong>ROR</strong> = 직전 1분 대비 Drum 온도 변화</div></div></section>
+</div>
+</div>
+
+<div id="pager" class="pager" hidden><button id="prevBtn" type="button" aria-label="이전">‹</button><div id="dots" class="dots"></div><button id="nextBtn" type="button" aria-label="다음">›</button></div>
+</div>
+
+<script src="roasting.js"></script></main></body></html>

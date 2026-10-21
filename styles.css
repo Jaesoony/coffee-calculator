@@ -29,3 +29,21 @@ input.yield-low{border-color:#2368b2;color:#2368b2;background:#f5f9ff}input.yiel
 .chart-box{width:100%;overflow:hidden;border-radius:12px;background:#fff}
 .chart-box svg{display:block}
 @media (orientation:landscape) and (max-height:520px){.wrap-flex{max-width:900px}}
+
+/* ---- 로스팅 계산기 ---- */
+.evhead,.evrow{display:grid;grid-template-columns:96px 1fr 1fr;gap:8px;align-items:center}
+.evhead{font-size:12px;color:#777;font-weight:700;margin-bottom:6px}
+.evrow{margin-bottom:9px}.evrow label{margin:0;font-size:13px}
+.tin.bad{border-color:#c53b30;background:#fff6f5}
+.rtable .trow{display:grid;grid-template-columns:42px repeat(4,1fr);gap:6px;align-items:center;margin-bottom:6px}
+.rtable .thead{font-size:11px;color:#777;font-weight:700;text-align:center;margin-bottom:6px}
+.rtable .tmin{font-size:13px;font-weight:700;color:#444}
+.rtable input{height:40px;padding:0 4px;font-size:16px;text-align:center;border-radius:9px}
+.rowbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rowbtns button{min-height:42px;font-size:14px;background:#fff;color:#222;border:1px solid #ddd}
+.result.three{grid-template-columns:1fr 1fr 1fr;gap:8px}.result.three .resultbox{padding:12px 10px}.result.three .value{font-size:22px}
+table.data{width:100%;border-collapse:collapse;font-size:13px}
+table.data th{font-size:12px;color:#777;font-weight:700;text-align:center;padding:6px 4px;border-bottom:1px solid #ddd}
+table.data td{text-align:center;padding:8px 4px;border-bottom:1px solid #eee}
+table.data td:first-child,table.data th:first-child{text-align:left}
+.ror-up{color:#147a42}.ror-down{color:#c53b30}
