@@ -9,3 +9,23 @@ button,.linkbtn{display:flex;align-items:center;justify-content:center;width:100
 @media(max-width:390px){.grid,.result{gap:8px}.card{padding:15px}.resultbox .value{font-size:22px}}
 
 input.yield-low{border-color:#2368b2;color:#2368b2;background:#f5f9ff}input.yield-high{border-color:#c53b30;color:#c53b30;background:#fff6f5}
+
+/* ---- 결과보기 화면 (보기 방식 전환 · 차트) ---- */
+[hidden]{display:none!important}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.toolbar .ghost{width:auto;min-height:40px;padding:0 14px;background:#fff;color:#222;border:1px solid #ddd;font-size:14px}
+.seg{display:flex;border:1px solid #ddd;border-radius:11px;overflow:hidden;background:#fff}
+.seg button{width:auto;min-height:40px;margin:0;padding:0 12px;border-radius:0;background:#fff;color:#666;font-size:14px;font-weight:600}
+.seg button[aria-pressed="true"]{background:#111;color:#fff}
+.pages.swipe{display:flex;align-items:flex-start;gap:13px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.pages.swipe::-webkit-scrollbar{display:none}
+.pages.swipe .page{flex:0 0 100%;min-width:0;scroll-snap-align:start}
+.pager{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px}
+.pager button{width:44px;min-height:44px;margin:0;font-size:24px;background:#fff;color:#222;border:1px solid #ddd}
+.pager button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:#ccc}
+.dot.on{background:#111}
+.chart-box{width:100%;overflow:hidden;border-radius:12px;background:#fff}
+.chart-box svg{display:block}
+@media (orientation:landscape) and (max-height:520px){.wrap-flex{max-width:900px}}

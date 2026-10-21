@@ -1,10 +1,32 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>브루잉 추출 계산기</title></head><body><main class="wrap"><div class="navback"><a href="index.html">← 계산기 선택</a></div><h1>☕ 브루잉 추출 계산기</h1>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>브루잉 추출 계산기</title></head><body><main class="wrap wrap-flex"><div class="navback"><a href="index.html">← 계산기 선택</a></div><h1>☕ 브루잉 추출 계산기</h1>
+
+<!-- 입력 화면 -->
+<div id="inputView">
 <section class="card"><div class="grid"><div class="field"><label for="dose">원두 무게 (g)</label><input id="dose" type="number" inputmode="decimal" step="0.1" placeholder="예: 15"></div><div class="field"><label for="water">투입 물 무게 (g)</label><input id="water" type="number" inputmode="decimal" step="1" placeholder="예: 250"></div></div>
 <div class="grid"><div class="field"><label for="beverage">실제 추출된 커피 무게 (g)</label><input id="beverage" type="number" inputmode="decimal" step="0.1" placeholder="예: 220"></div><div class="field"><label for="tds">TDS (%)</label><input id="tds" type="number" inputmode="decimal" step="0.01" placeholder="예: 1.30"></div></div>
 <div class="guide"><div class="row"><span>Brew Ratio</span><span class="badge" id="ratio">—</span></div><div class="small">Brew Ratio = 물 무게 ÷ 원두 무게</div></div>
-<button id="calcBtn" type="button">계산하기</button></section>
-<section class="card"><div class="result"><div class="resultbox"><div class="label">추출수율 (Extraction Yield)</div><div class="value" id="ey">—</div></div><div class="resultbox"><div class="label">Brew Ratio</div><div class="value" id="ratioResult">—</div></div></div></section>
-<section class="card"><h2>SCA Brewing Control Chart</h2><div class="chart-wrap"><img src="assets/brewing-control-chart.jpg" alt="SCA Brewing Control Chart"><div id="dot" class="chart-dot"></div></div><div id="chartNote" class="chart-note">원두 무게, 물 무게, 실제 추출량, TDS를 입력하면 차트 위에 현재 위치가 표시됩니다.</div></section>
+<div id="msg" class="input-alert high" hidden></div>
+<button id="calcBtn" type="button">결과보기</button></section>
+</div>
+
+<!-- 결과 화면 -->
+<div id="resultView" hidden>
+<div class="toolbar"><button id="backBtn" class="ghost" type="button">← 입력 수정</button><div class="seg" role="group" aria-label="보기 방식"><button id="modeScroll" type="button" aria-pressed="true">세로 스크롤</button><button id="modeSwipe" type="button" aria-pressed="false">가로 넘기기</button></div></div>
+
+<div id="pages" class="pages scroll">
+<div class="page" id="page1">
+<section class="card"><h2>추출 결과</h2><div class="result"><div class="resultbox"><div class="label">추출수율 (Extraction Yield)</div><div class="value" id="ey">—</div></div><div class="resultbox"><div class="label">Brew Ratio</div><div class="value" id="ratioResult">—</div></div></div></section>
+</div>
+<div class="page" id="page2">
+<section class="card"><h2>SCA Brewing Control Chart</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">사선은 물 1.9 L 기준 원두 사용량(g)별 Brew Ratio 선입니다. 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</div></section>
+</div>
+<div class="page" id="page3">
 <section class="card"><h2>브루잉 기준 가이드</h2><div class="small">Brew Ratio: 1:15~1:18 (PDF 기준)</div><div class="small">TDS: 1.15~1.35% (PDF 기준)</div><div class="small">Extraction Yield: 18~22% (PDF 기준)</div></section>
 <section class="card"><h2>계산식</h2><div class="formula"><div><strong>Brew Ratio</strong> = 물 무게 ÷ 원두 무게</div><div><strong>Extraction Yield</strong> = TDS × 실제 추출된 커피 무게 ÷ 원두 무게</div><div style="margin-top:7px;color:#666">PDF에는 흡수계수를 이용한 근사식도 제시되어 있습니다. 현재 화면은 실제 추출된 커피 무게를 입력하는 방식으로 계산합니다.</div></div></section>
+</div>
+</div>
+
+<div id="pager" class="pager" hidden><button id="prevBtn" type="button" aria-label="이전">‹</button><div id="dots" class="dots"></div><button id="nextBtn" type="button" aria-label="다음">›</button></div>
+</div>
+
 <script src="brewing.js"></script></main></body></html>
