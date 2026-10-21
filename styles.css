@@ -31,19 +31,31 @@ input.yield-low{border-color:#2368b2;color:#2368b2;background:#f5f9ff}input.yiel
 @media (orientation:landscape) and (max-height:520px){.wrap-flex{max-width:900px}}
 
 /* ---- 로스팅 계산기 ---- */
-.evhead,.evrow{display:grid;grid-template-columns:96px 1fr 1fr;gap:8px;align-items:center}
-.evhead{font-size:12px;color:#777;font-weight:700;margin-bottom:6px}
-.evrow{margin-bottom:9px}.evrow label{margin:0;font-size:13px}
-.tin.bad{border-color:#c53b30;background:#fff6f5}
-.rtable .trow{display:grid;grid-template-columns:42px repeat(4,1fr);gap:6px;align-items:center;margin-bottom:6px}
-.rtable .thead{font-size:11px;color:#777;font-weight:700;text-align:center;margin-bottom:6px}
-.rtable .tmin{font-size:13px;font-weight:700;color:#444}
+.req{color:#c53b30;font-size:.8em;vertical-align:super;margin-left:2px;font-weight:700}
+.reqnote{margin:0 2px 12px}
+.opt{font-weight:500;color:#888;font-size:12px;margin-left:6px}
+.evbox{border:1px solid #e6e6e6;border-radius:14px;padding:12px;margin-bottom:12px}
+.evtitle{font-weight:800;font-size:15px;margin-bottom:10px}
+.frow{display:grid;grid-template-columns:118px 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.frow:last-child{margin-bottom:0}
+.flabel{display:flex;align-items:center;min-height:46px;padding:0 12px;border-radius:10px;background:#f1f1f1;font-size:14px;font-weight:700;color:#333}
+.frow input{height:46px}
+input.miss,input.bad{border-color:#c53b30;background:#fff6f5}
+#msg{background:#fff6f5;border:1px solid #f1c6c1;border-radius:12px;padding:12px 14px;margin:0 0 12px;font-size:13px;line-height:1.75;color:#c53b30}
+#msg b{display:block;margin-bottom:2px}
+.rtable .trow{display:grid;grid-template-columns:40px repeat(4,1fr);gap:6px;align-items:end;padding-bottom:9px;margin-bottom:9px;border-bottom:1px dashed #e4e4e4}
+.rtable .trow:last-child{border-bottom:0;margin-bottom:0}
+.rtable .tmin{display:flex;align-items:center;height:40px;font-size:13px;font-weight:800;color:#444}
+.rtable .tcell{display:block;margin:0}
+.rtable .tl{display:block;font-size:11px;line-height:1.25;font-weight:700;color:#444;margin-bottom:4px}
+.rtable .tl i{display:block;font-style:normal;font-weight:500;color:#999}
 .rtable input{height:40px;padding:0 4px;font-size:16px;text-align:center;border-radius:9px}
-.rowbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rtable input.auto{color:#8a8a8a;background:#f6f6f6}
+.rowbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .rowbtns button{min-height:42px;font-size:14px;background:#fff;color:#222;border:1px solid #ddd}
 .result.three{grid-template-columns:1fr 1fr 1fr;gap:8px}.result.three .resultbox{padding:12px 10px}.result.three .value{font-size:22px}
 table.data{width:100%;border-collapse:collapse;font-size:13px}
 table.data th{font-size:12px;color:#777;font-weight:700;text-align:center;padding:6px 4px;border-bottom:1px solid #ddd}
 table.data td{text-align:center;padding:8px 4px;border-bottom:1px solid #eee}
 table.data td:first-child,table.data th:first-child{text-align:left}
-.ror-up{color:#147a42}.ror-down{color:#c53b30}
+.ror-flag{color:#c53b30;font-weight:800}

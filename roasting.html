@@ -2,24 +2,21 @@
 
 <!-- 입력 화면 -->
 <div id="inputView">
+<div class="small reqnote"><b class="req">*</b> 표시는 필수 입력이에요. 2nd pop과 Exhaust는 선택이에요.</div>
+
 <section class="card"><h2>기본 정보</h2>
-<div class="grid"><div class="field"><label for="agWB">Agtron WB</label><input id="agWB" type="number" inputmode="decimal" step="0.1" placeholder="예: 65"></div><div class="field"><label for="agRGB">Agtron RGB</label><input id="agRGB" type="number" inputmode="decimal" step="0.1" placeholder="예: 70"></div></div>
-<div class="grid"><div class="field"><label for="wIn">투입 무게 (g)</label><input id="wIn" type="number" inputmode="decimal" step="0.1" placeholder="예: 1000"></div><div class="field"><label for="wOut">배출 무게 (g)</label><input id="wOut" type="number" inputmode="decimal" step="0.1" placeholder="예: 850"></div></div>
-<div class="grid"><div class="field"><label for="inFire">투입 화력</label><input id="inFire" type="number" inputmode="decimal" step="any" placeholder="예: 5"></div><div class="field"><label for="inTemp">투입 온도 (°C)</label><input id="inTemp" type="number" inputmode="decimal" step="0.1" placeholder="예: 200"></div></div>
+<div class="grid"><div class="field"><label for="agWB">Agtron WB<b class="req">*</b></label><input id="agWB" type="number" inputmode="decimal" step="0.1" placeholder="예: 65"></div><div class="field"><label for="agRGB">Agtron RGB<b class="req">*</b></label><input id="agRGB" type="number" inputmode="decimal" step="0.1" placeholder="예: 70"></div></div>
+<div class="grid"><div class="field"><label for="wIn">투입 무게 (g)<b class="req">*</b></label><input id="wIn" type="number" inputmode="decimal" step="0.1" placeholder="예: 1000"></div><div class="field"><label for="wOut">배출 무게 (g)<b class="req">*</b></label><input id="wOut" type="number" inputmode="decimal" step="0.1" placeholder="예: 850"></div></div>
+<div class="grid"><div class="field"><label for="inFire">투입 화력<b class="req">*</b></label><input id="inFire" type="number" inputmode="decimal" step="any" placeholder="예: 5"></div><div class="field"><label for="inTemp">투입 온도 (°C)<b class="req">*</b></label><input id="inTemp" type="number" inputmode="decimal" step="0.1" placeholder="예: 200"></div></div>
 </section>
 
 <section class="card"><h2>이벤트 시간 / 온도</h2>
-<div class="small" style="margin:-6px 0 12px">시간은 분:초로 입력해요. 숫자만 써도 됩니다. (830 → 8:30)</div>
-<div class="evhead"><span></span><span>시간</span><span>온도 (°C)</span></div>
-<div class="evrow"><label>Turning P</label><input id="tp_t" class="tin" inputmode="numeric" placeholder="1:30"><input id="tp_c" type="number" inputmode="decimal" step="0.1"></div>
-<div class="evrow"><label>Yellow P</label><input id="yp_t" class="tin" inputmode="numeric" placeholder="5:00"><input id="yp_c" type="number" inputmode="decimal" step="0.1"></div>
-<div class="evrow"><label>1st pop</label><input id="c1_t" class="tin" inputmode="numeric" placeholder="8:30"><input id="c1_c" type="number" inputmode="decimal" step="0.1"></div>
-<div class="evrow"><label>2nd pop</label><input id="c2_t" class="tin" inputmode="numeric" placeholder="(선택)"><input id="c2_c" type="number" inputmode="decimal" step="0.1"></div>
-<div class="evrow"><label>배출 Output</label><input id="out_t" class="tin" inputmode="numeric" placeholder="10:30"><input id="out_c" type="number" inputmode="decimal" step="0.1"></div>
+<div class="small" style="margin:-6px 0 12px">시간은 분:초로 입력해요. 숫자만 써도 자동으로 바뀌어요. (057 → 0:57, 830 → 8:30)</div>
+<div id="evInputs"></div>
 </section>
 
 <section class="card"><h2>1분 간격 기록</h2>
-<div class="small" style="margin:-6px 0 12px">ROR은 Drum 온도를 기준으로 계산해요.</div>
+<div class="small" style="margin:-6px 0 12px">Fire와 Damper는 위 칸에 입력하면 아래 칸에 자동으로 채워져요. 바꾸는 칸부터 다시 이어져요. ROR은 Drum 온도를 기준으로 계산해요.</div>
 <div id="rtable" class="rtable"></div>
 <div class="rowbtns"><button id="addRow" type="button">+ 1분 추가</button><button id="delRow" type="button">− 마지막 줄 삭제</button></div>
 </section>
@@ -34,7 +31,7 @@
 
 <div id="pages" class="pages scroll">
 <div class="page" id="page1">
-<section class="card"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div></section>
+<section class="card"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. 터닝 포인트 이후부터 확인해요.</div></section>
 </div>
 <div class="page" id="page2">
 <section class="card"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출. 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</div></section>
