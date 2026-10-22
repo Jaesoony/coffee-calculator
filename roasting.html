@@ -7,7 +7,8 @@
 <section class="card"><h2>기본 정보</h2>
 <div class="grid"><div class="field"><label for="agWB">Agtron WB<b class="req">*</b></label><input id="agWB" type="number" inputmode="decimal" step="0.1" placeholder="예: 65"></div><div class="field"><label for="agRGB">Agtron RGB<b class="req">*</b></label><input id="agRGB" type="number" inputmode="decimal" step="0.1" placeholder="예: 70"></div></div>
 <div class="grid"><div class="field"><label for="wIn">투입 무게 (g)<b class="req">*</b></label><input id="wIn" type="number" inputmode="decimal" step="0.1" placeholder="예: 1000"></div><div class="field"><label for="wOut">배출 무게 (g)<b class="req">*</b></label><input id="wOut" type="number" inputmode="decimal" step="0.1" placeholder="예: 850"></div></div>
-<div class="grid"><div class="field"><label for="inFire">투입 화력<b class="req">*</b></label><input id="inFire" type="number" inputmode="decimal" step="any" placeholder="예: 5"></div><div class="field"><label for="inTemp">투입 온도 (°C)<b class="req">*</b></label><input id="inTemp" type="number" inputmode="decimal" step="0.1" placeholder="예: 200"></div></div>
+<div class="grid"><div class="field"><label for="inFire">투입 화력 Fire<b class="req">*</b></label><input id="inFire" type="number" inputmode="decimal" step="any" placeholder="예: 5"></div><div class="field"><label for="inDamper">투입 Damper<b class="req">*</b></label><input id="inDamper" type="number" inputmode="decimal" step="any" placeholder="예: 1200"></div></div>
+<div class="grid"><div class="field"><label for="inTemp">투입 온도 (°C)<b class="req">*</b></label><input id="inTemp" type="number" inputmode="decimal" step="0.1" placeholder="예: 200"></div></div>
 </section>
 
 <section class="card"><h2>이벤트 시간 / 온도</h2>
@@ -15,8 +16,14 @@
 <div id="evInputs"></div>
 </section>
 
+<section class="card"><h2>Fire / Damper 조작 기록</h2>
+<div class="small" style="margin:-6px 0 12px">투입할 때의 설정은 위 기본 정보에 입력해요. 투입 이후에 조작한 순간만 시간과 함께 추가하세요. 입력하지 않은 시점은 직전 값이 이어져요.</div>
+<div id="ctlList" class="clist"></div>
+<div class="rowbtns one"><button id="addCtl" type="button">+ 조작 추가</button></div>
+</section>
+
 <section class="card"><h2>1분 간격 기록</h2>
-<div class="small" style="margin:-6px 0 12px">Fire와 Damper는 위 칸에 입력하면 아래 칸에 자동으로 채워져요. 바꾸는 칸부터 다시 이어져요. ROR은 Drum 온도를 기준으로 계산해요.</div>
+<div class="small" style="margin:-6px 0 12px">Exhaust와 Drum 온도를 1분마다 입력해요. ROR은 Drum 온도를 기준으로 계산해요.</div>
 <div id="rtable" class="rtable"></div>
 <div class="rowbtns"><button id="addRow" type="button">+ 1분 추가</button><button id="delRow" type="button">− 마지막 줄 삭제</button></div>
 </section>
@@ -34,11 +41,12 @@
 <section class="card"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. 터닝 포인트 이후부터 확인해요.</div></section>
 </div>
 <div class="page" id="page2">
-<section class="card"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출. 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</div></section>
+<section class="card"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">위 그래프의 실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출.</div><div class="chart-note">아래 그래프의 <b style="color:#d9480f">주황 계단</b>은 Fire, <b style="color:#1c7ed6">파란 점</b>은 Damper예요. Damper는 그래프에서만 100으로 나눠 표시하고, 점 위 숫자는 실제 값이에요. 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</div></section>
 </div>
 <div class="page" id="page3">
 <section class="card"><h2>로스팅 결과</h2><div class="result three"><div class="resultbox"><div class="label">DT</div><div class="value" id="rDT">—</div></div><div class="resultbox"><div class="label">DTR</div><div class="value" id="rDTR">—</div></div><div class="resultbox"><div class="label">중량 손실률</div><div class="value" id="rLoss">—</div></div></div><div id="rNote" class="chart-note"></div></section>
 <section class="card"><h2>이벤트 요약</h2><div id="evTable"></div></section>
+<section class="card"><h2>Fire / Damper 조작 기록</h2><div id="ctlTable"></div></section>
 <section class="card"><h2>계산식</h2><div class="formula"><div><strong>DT</strong> = 배출 시간 − 1차 크랙 시간</div><div><strong>DTR</strong> = DT ÷ 배출 시간 × 100</div><div><strong>중량 손실률</strong> = (투입 무게 − 배출 무게) ÷ 투입 무게 × 100</div><div><strong>ROR</strong> = 직전 1분 대비 Drum 온도 변화</div></div></section>
 </div>
 </div>

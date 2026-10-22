@@ -43,15 +43,15 @@ input.yield-low{border-color:#2368b2;color:#2368b2;background:#f5f9ff}input.yiel
 input.miss,input.bad{border-color:#c53b30;background:#fff6f5}
 #msg{background:#fff6f5;border:1px solid #f1c6c1;border-radius:12px;padding:12px 14px;margin:0 0 12px;font-size:13px;line-height:1.75;color:#c53b30}
 #msg b{display:block;margin-bottom:2px}
-.rtable .trow{display:grid;grid-template-columns:40px repeat(4,1fr);gap:6px;align-items:end;padding-bottom:9px;margin-bottom:9px;border-bottom:1px dashed #e4e4e4}
+.rtable .trow{display:grid;grid-template-columns:40px 1fr 1fr;gap:6px;align-items:end;padding-bottom:9px;margin-bottom:9px;border-bottom:1px dashed #e4e4e4}
 .rtable .trow:last-child{border-bottom:0;margin-bottom:0}
 .rtable .tmin{display:flex;align-items:center;height:40px;font-size:13px;font-weight:800;color:#444}
 .rtable .tcell{display:block;margin:0}
 .rtable .tl{display:block;font-size:11px;line-height:1.25;font-weight:700;color:#444;margin-bottom:4px}
 .rtable .tl i{display:block;font-style:normal;font-weight:500;color:#999}
 .rtable input{height:40px;padding:0 4px;font-size:16px;text-align:center;border-radius:9px}
-.rtable input.auto{color:#8a8a8a;background:#f6f6f6}
 .rowbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.rowbtns.one{grid-template-columns:1fr}
 .rowbtns button{min-height:42px;font-size:14px;background:#fff;color:#222;border:1px solid #ddd}
 .result.three{grid-template-columns:1fr 1fr 1fr;gap:8px}.result.three .resultbox{padding:12px 10px}.result.three .value{font-size:22px}
 table.data{width:100%;border-collapse:collapse;font-size:13px}
@@ -59,3 +59,12 @@ table.data th{font-size:12px;color:#777;font-weight:700;text-align:center;paddin
 table.data td{text-align:center;padding:8px 4px;border-bottom:1px solid #eee}
 table.data td:first-child,table.data th:first-child{text-align:left}
 .ror-flag{color:#c53b30;font-weight:800}
+.clist:empty::after{content:"아직 추가한 조작이 없어요.";display:block;font-size:12px;color:#999;margin-bottom:4px}
+.crow{display:grid;grid-template-columns:1fr 1.35fr 1fr 40px;gap:6px;align-items:end;padding-bottom:9px;margin-bottom:9px;border-bottom:1px dashed #e4e4e4}
+.crow .tcell{display:block;margin:0}
+.crow .tl{display:block;font-size:11px;line-height:1.25;font-weight:700;color:#444;margin-bottom:4px}
+.crow .tl i{display:block;font-style:normal;font-weight:500;color:#999;min-height:13px}
+.crow input,.crow select{height:40px;padding:0 6px;font-size:16px;border-radius:9px}
+.crow select{padding:0 2px 0 8px}
+.crow input{text-align:center}
+.crow .xbtn{width:40px;min-height:40px;padding:0;margin:0;background:#fff;color:#888;border:1px solid #ddd;font-size:16px;font-weight:600}
