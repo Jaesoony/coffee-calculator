@@ -55,7 +55,7 @@ function addCtl(focus){
   d.innerHTML=`<label class="tcell"><span class="tl">시간<i>분:초</i></span><input class="tin c-t" inputmode="numeric" placeholder="예: 3:20"></label>`+
   `<label class="tcell"><span class="tl">항목<i></i></span><select class="c-k"><option value="fire">Fire</option><option value="damper">Damper</option></select></label>`+
   `<label class="tcell"><span class="tl">값<i></i></span><input class="c-v" type="number" inputmode="decimal" step="any" placeholder="예: 4"></label>`+
-  `<button class="xbtn" type="button" aria-label="이 조작 삭제">✕</button>`;
+  `<button class="xbtn" type="button" tabindex="-1" aria-label="이 조작 삭제">✕</button>`;
   $('ctlList').appendChild(d);
   if(focus)d.querySelector('.c-t').focus();
 }
@@ -97,6 +97,8 @@ const ranges=a=>{const o=[];let s=a[0],p=a[0];for(let i=1;i<=a.length;i++){if(a[
 function checkRequired(){
   document.querySelectorAll('.miss,.bad').forEach(el=>el.classList.remove('miss','bad'));
   const lines=[],mark=el=>{el.classList.add('miss');return el};
+  const wm=Work.missing();
+  if(wm.length){wm.forEach(x=>mark($(x.id)));lines.push(`작업 정보: ${wm.map(x=>x.name).join(', ')}`)}
   // 기본 정보
   const b=BASIC.filter(([id])=>empty($(id))).map(([id,name])=>{mark($(id));return name});
   if(b.length)lines.push(`기본 정보: ${b.join(', ')}`);
@@ -266,7 +268,7 @@ function drawChart(){
 /* ---------- 결과보기 ---------- */
 function showResults(){
   if(!checkRequired())return;
-  const d=collect();current=d;
+  const d=collect();current=d;Work.renderHeads();
   const r=summarize(d);
   $('rDT').textContent=fmt(r.dt);$('rDTR').textContent=ok(r.dtr)?r.dtr.toFixed(1)+'%':'—';$('rLoss').textContent=ok(r.loss)?r.loss.toFixed(1)+'%':'—';
   const notes=[];

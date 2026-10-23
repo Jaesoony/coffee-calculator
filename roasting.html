@@ -2,6 +2,7 @@
 
 <!-- 입력 화면 -->
 <div id="inputView">
+<div id="workInfo" data-kind="생두" data-title="로스팅 추출 계산기" data-extra="moisture,density"></div>
 <div class="small reqnote"><b class="req">*</b> 표시는 필수 입력이에요. 2nd pop과 Exhaust는 선택이에요.</div>
 
 <section class="card"><h2>기본 정보</h2>
@@ -34,24 +35,27 @@
 
 <!-- 결과 화면 -->
 <div id="resultView" hidden>
+<div class="card rhead"></div>
 <div class="toolbar"><button id="backBtn" class="ghost" type="button">← 입력 수정</button><div class="seg" role="group" aria-label="보기 방식"><button id="modeScroll" type="button" aria-pressed="true">세로 스크롤</button><button id="modeSwipe" type="button" aria-pressed="false">가로 넘기기</button></div></div>
+
+<div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 / PDF 저장</button></div>
 
 <div id="pages" class="pages scroll">
 <div class="page" id="page1">
-<section class="card"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. 터닝 포인트 이후부터 확인해요.</div></section>
+<section class="card pr3"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. 터닝 포인트 이후부터 확인해요.</div></section>
 </div>
 <div class="page" id="page2">
-<section class="card"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">위 그래프의 실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출.</div><div class="chart-note">아래 그래프의 <b style="color:#d9480f">주황 계단</b>은 Fire, <b style="color:#1c7ed6">파란 점</b>은 Damper예요. Damper는 그래프에서만 100으로 나눠 표시하고, 점 위 숫자는 실제 값이에요. 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</div></section>
+<section class="card pr2"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">위 그래프의 실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출.</div><div class="chart-note">아래 그래프의 <b style="color:#d9480f">주황 계단</b>은 Fire, <b style="color:#1c7ed6">파란 점</b>은 Damper예요. Damper는 그래프에서만 100으로 나눠 표시하고, 점 위 숫자는 실제 값이에요.<span class="noprint"> 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</span></div></section>
 </div>
 <div class="page" id="page3">
-<section class="card"><h2>로스팅 결과</h2><div class="result three"><div class="resultbox"><div class="label">DT</div><div class="value" id="rDT">—</div></div><div class="resultbox"><div class="label">DTR</div><div class="value" id="rDTR">—</div></div><div class="resultbox"><div class="label">중량 손실률</div><div class="value" id="rLoss">—</div></div></div><div id="rNote" class="chart-note"></div></section>
-<section class="card"><h2>이벤트 요약</h2><div id="evTable"></div></section>
-<section class="card"><h2>Fire / Damper 조작 기록</h2><div id="ctlTable"></div></section>
-<section class="card"><h2>계산식</h2><div class="formula"><div><strong>DT</strong> = 배출 시간 − 1차 크랙 시간</div><div><strong>DTR</strong> = DT ÷ 배출 시간 × 100</div><div><strong>중량 손실률</strong> = (투입 무게 − 배출 무게) ÷ 투입 무게 × 100</div><div><strong>ROR</strong> = 직전 1분 대비 Drum 온도 변화</div></div></section>
+<section class="card pr1"><h2>로스팅 결과</h2><div class="result three"><div class="resultbox"><div class="label">DT</div><div class="value" id="rDT">—</div></div><div class="resultbox"><div class="label">DTR</div><div class="value" id="rDTR">—</div></div><div class="resultbox"><div class="label">중량 손실률</div><div class="value" id="rLoss">—</div></div></div><div id="rNote" class="chart-note"></div></section>
+<section class="card pr4"><h2>이벤트 요약</h2><div id="evTable"></div></section>
+<section class="card pr5"><h2>Fire / Damper 조작 기록</h2><div id="ctlTable"></div></section>
+<section class="card pr-hide"><h2>계산식</h2><div class="formula"><div><strong>DT</strong> = 배출 시간 − 1차 크랙 시간</div><div><strong>DTR</strong> = DT ÷ 배출 시간 × 100</div><div><strong>중량 손실률</strong> = (투입 무게 − 배출 무게) ÷ 투입 무게 × 100</div><div><strong>ROR</strong> = 직전 1분 대비 Drum 온도 변화</div></div></section>
 </div>
 </div>
 
 <div id="pager" class="pager" hidden><button id="prevBtn" type="button" aria-label="이전">‹</button><div id="dots" class="dots"></div><button id="nextBtn" type="button" aria-label="다음">›</button></div>
 </div>
 
-<script src="roasting.js"></script></main></body></html>
+<script src="common.js"></script><script src="roasting.js"></script></main></body></html>

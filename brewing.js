@@ -77,11 +77,13 @@ function drawChart(){
 /* ---------- 결과보기 ---------- */
 function showResults(){
   const{d,w,b,t}=readInputs(),missing=[];
+  Work.missing().forEach(m=>{missing.push(m.name);$(m.id).classList.add('miss')});
   if(!(d>0))missing.push('원두 무게');if(!(w>0))missing.push('투입 물 무게');
   if(!(b>0))missing.push('실제 추출된 커피 무게');if(!(t>0))missing.push('TDS');
   const msg=$('msg');
   if(missing.length){msg.textContent=missing.join(', ')+' 값을 입력해 주세요.';msg.hidden=false;return}
   msg.hidden=true;
+  Work.renderHeads();
   const ey=b*t/d,ratio=w/d;
   current={ey,t};
   $('ey').textContent=ey.toFixed(2)+'%';
