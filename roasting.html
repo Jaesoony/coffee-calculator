@@ -42,16 +42,34 @@
 
 <div id="pages" class="pages scroll">
 <div class="page" id="page1">
-<section class="card pr3"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. 터닝 포인트 이후부터 확인해요.</div></section>
+<section class="card pr1"><h2>로스팅 결과</h2>
+<div class="result three"><div class="resultbox"><div class="label">DT</div><div class="value" id="rDT">—</div></div><div class="resultbox"><div class="label">DTR</div><div class="value" id="rDTR">—</div></div><div class="resultbox"><div class="label">중량 손실률</div><div class="value" id="rLoss">—</div></div></div>
+<div class="sublabel">구간 비율 (전체 로스팅 시간 기준)</div>
+<div class="result three"><div class="resultbox"><div class="label">수분날리기</div><div class="value" id="rDry">—</div><div class="tgt">권장 35%</div></div><div class="resultbox"><div class="label">Roasting Phase</div><div class="value" id="rPhase">—</div><div class="tgt">권장 45%</div></div><div class="resultbox"><div class="label">DT</div><div class="value" id="rDTp">—</div><div class="tgt">권장 20%</div></div></div>
+<div class="sumline" id="rSum"></div>
+<div id="rNote" class="chart-note"></div></section>
+<section class="card pr4"><h2>이벤트 요약</h2><div id="evTable"></div></section>
 </div>
 <div class="page" id="page2">
-<section class="card pr2"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">위 그래프의 실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출.</div><div class="chart-note">아래 그래프의 <b style="color:#d9480f">주황 계단</b>은 Fire, <b style="color:#1c7ed6">파란 점</b>은 Damper예요. Damper는 그래프에서만 100으로 나눠 표시하고, 점 위 숫자는 실제 값이에요.<span class="noprint"> 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</span></div></section>
+<section class="card pr3"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. 터닝 포인트 이후부터 확인해요.</div></section>
 </div>
 <div class="page" id="page3">
-<section class="card pr1"><h2>로스팅 결과</h2><div class="result three"><div class="resultbox"><div class="label">DT</div><div class="value" id="rDT">—</div></div><div class="resultbox"><div class="label">DTR</div><div class="value" id="rDTR">—</div></div><div class="resultbox"><div class="label">중량 손실률</div><div class="value" id="rLoss">—</div></div></div><div id="rNote" class="chart-note"></div></section>
-<section class="card pr4"><h2>이벤트 요약</h2><div id="evTable"></div></section>
+<section class="card pr2"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">위 그래프의 실선은 Drum, 점선은 Exhaust 온도예요. TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출.</div><div class="chart-note">아래 그래프의 <b style="color:#d9480f">주황 계단</b>은 Fire, <b style="color:#1c7ed6">파란 점</b>은 Damper예요. Damper는 Fire와 눈금이 맞도록 그래프에서만 배율을 자동으로 맞춰 그리고(범례에 표시), 점 위 숫자는 기록한 값 그대로예요.<span class="noprint"> 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</span></div></section>
+</div>
+<div class="page" id="page4">
 <section class="card pr5"><h2>Fire / Damper 조작 기록</h2><div id="ctlTable"></div></section>
-<section class="card pr-hide"><h2>계산식</h2><div class="formula"><div><strong>DT</strong> = 배출 시간 − 1차 크랙 시간</div><div><strong>DTR</strong> = DT ÷ 배출 시간 × 100</div><div><strong>중량 손실률</strong> = (투입 무게 − 배출 무게) ÷ 투입 무게 × 100</div><div><strong>ROR</strong> = 직전 1분 대비 Drum 온도 변화</div></div></section>
+<section class="card pr-hide"><h2>계산식</h2><div class="formula">
+<div><strong>DT</strong> = 배출 시간 − 1차 크랙 시간</div>
+<div><strong>DTR</strong> = DT ÷ 배출 시간 × 100</div>
+<div><strong>중량 손실률</strong> = (투입 무게 − 배출 무게) ÷ 투입 무게 × 100</div>
+<div><strong>ROR</strong> = 직전 1분 대비 Drum 온도 변화</div>
+<div style="margin-top:8px"><strong>수분날리기</strong> = YP 시간 ÷ 배출 시간 × 100 <span style="color:#777">(투입 ~ YP)</span></div>
+<div><strong>Roasting Phase</strong> = (1차 크랙 시간 − YP 시간) ÷ 배출 시간 × 100 <span style="color:#777">(YP ~ 1st pop)</span></div>
+<div><strong>DT</strong> = DT ÷ 배출 시간 × 100 <span style="color:#777">(1st pop ~ 배출, DTR과 같은 값)</span></div>
+<div>세 구간의 합 = 100%</div>
+<div style="margin-top:7px"><strong>권장 비율</strong> (수업 기준): 수분날리기 35% → Roasting Phase 45% → DT 20%</div>
+<div style="margin-top:7px;color:#666">소수 첫째 자리로 표시할 때 반올림 때문에 합이 어긋나지 않도록, 수분날리기와 DT를 반올림한 값에 맞춰 Roasting Phase를 정리해 합계가 100.0%가 되게 해요.</div>
+</div></section>
 </div>
 </div>
 

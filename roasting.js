@@ -2,7 +2,7 @@ const $=id=>document.getElementById(id);
 
 /* ---------- 기준값 (세로축은 학원 기록지 양식 60~250°C, 가로축은 입력 길이에 맞춤) ---------- */
 const X_FIT_MIN=5,Y_MIN=60,Y_MAX=250,START_ROWS=13,MAX_ROWS=31; // 0:00~12:00 13줄, 최대 30:00
-const FIRE_C='#d9480f',DAMP_C='#1c7ed6',DAMP_DIV=100;            // Damper는 그래프에서만 ÷100
+const FIRE_C='#d9480f',DAMP_C='#1c7ed6';
 const EVENTS=[
   {k:'tp',name:'Turning P',short:'TP',color:'#2368b2',req:true},
   {k:'yp',name:'Yellow P',short:'YP',color:'#c28a00',req:true},
@@ -85,11 +85,18 @@ function collect(){
     wIn:num($('wIn')),wOut:num($('wOut')),agWB:num($('agWB')),agRGB:num($('agRGB')),inTemp:num($('inTemp'))};
 }
 function summarize(d){
-  const out=d.ev.out.t,c1=d.ev.c1.t;
+  const out=d.ev.out.t,c1=d.ev.c1.t,yp=d.ev.yp.t;
   const dt=(ok(out)&&ok(c1)&&out>c1)?out-c1:NaN;
   const dtr=(ok(dt)&&out>0)?dt/out*100:NaN;
   const loss=(d.wIn>0&&d.wOut>0&&d.wOut<=d.wIn)?(d.wIn-d.wOut)/d.wIn*100:NaN;
-  return{dt,dtr,loss};
+  // 구간 비율: 수분날리기(투입~YP) + Roasting Phase(YP~1st) + DT(1st~배출) = 100%
+  let dry=NaN,phase=NaN,dtp=NaN,sum=NaN;
+  if(ok(yp)&&ok(c1)&&ok(out)&&yp>0&&yp<c1&&c1<out){
+    dry=+(yp/out*100).toFixed(1);dtp=+dtr.toFixed(1);   // DT 비율 = DTR (같은 값)
+    phase=+(100-dry-dtp).toFixed(1);                     // 반올림 어긋남은 Roasting Phase에 맞춰 합계 100.0%
+    sum=dry+phase+dtp;
+  }
+  return{dt,dtr,loss,dry,phase,dtp,sum};
 }
 
 /* ---------- 필수 입력 확인 ---------- */
@@ -187,6 +194,14 @@ function smoothPath(p){
 const niceMax=v=>{const mag=Math.pow(10,Math.floor(Math.log10(v)));for(const m of [1,2,2.5,5,10]){if(m*mag>=v*1.1)return m*mag}return 10*mag};
 const hit=(a,b)=>a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3];
 
+// Damper 값은 기록자마다 150 / 1.5 처럼 자릿수가 달라서, Fire와 같은 눈금에 보이도록 10의 거듭제곱 배율을 자동으로 고른다.
+function damperScale(d){
+  const mx=a=>Math.max(0,...a.map(p=>Math.abs(p[1])).filter(ok));
+  const f=mx(d.fire),m=mx(d.damper);
+  return(f>0&&m>0)?Math.pow(10,Math.round(Math.log10(f/m))):0.01;
+}
+const scaleTxt=k=>k>=1?`×${+k.toPrecision(3)}`:`÷${+(1/k).toPrecision(3)}`;
+
 /* ---------- 프로파일 그래프 (SVG): 위 = 온도, 아래 = Fire(계단) + Damper(점) ---------- */
 function chartSVG(W,H,d){
   const pts=k=>d.list.filter(x=>ok(x[k])).map(x=>[x.min,x[k]]);
@@ -196,7 +211,8 @@ function chartSVG(W,H,d){
   const allX=[...dr,...ex].map(p=>p[0]).concat(evs.map(e=>d.ev[e.k].t/60),ctlT),allY=[...dr,...ex].map(p=>p[1]).concat(evs.map(e=>d.ev[e.k].c));
   const xMax=Math.max(X_FIT_MIN,Math.ceil(Math.max(0,...allX))+1); // 입력한 데이터 길이에 맞춰 가로축 자동 조정
   const yMin=Math.min(Y_MIN,Math.floor(Math.min(Y_MIN,...allY)/10)*10),yMax=Math.max(Y_MAX,Math.ceil(Math.max(Y_MAX,...allY)/10)*10);
-  const subVals=d.fire.map(p=>p[1]).concat(d.damper.map(p=>p[1]/DAMP_DIV)).filter(ok);
+  const dk=damperScale(d);
+  const subVals=d.fire.map(p=>p[1]).concat(d.damper.map(p=>p[1]*dk)).filter(ok);
   const subMax=niceMax(Math.max(1,...subVals));
   // 배치
   const ml=46,mr=12,mt=16,mb=40,gap=20,pw=W-ml-mr,inner=H-mt-mb-gap;
@@ -218,7 +234,7 @@ function chartSVG(W,H,d){
   [0,subMax/2,subMax].forEach(v=>{s+=`<line x1="${ml}" y1="${syS(v)}" x2="${ml+pw}" y2="${syS(v)}" stroke="#ececec"/><text x="${ml-6}" y="${syS(v)+4}" font-size="10" fill="#777" text-anchor="end">${+v.toFixed(1)}</text>`});
   s+=`<rect x="${ml}" y="${mt}" width="${pw}" height="${phM}" fill="none" stroke="#999"/><rect x="${ml}" y="${subTop}" width="${pw}" height="${phS}" fill="none" stroke="#999"/>`;
   s+=`<text x="${ml+pw/2}" y="${H-6}" font-size="12" font-weight="700" fill="#333" text-anchor="middle">시간 (분)</text><text transform="translate(10 ${mt+phM/2}) rotate(-90)" font-size="12" font-weight="700" fill="#333" text-anchor="middle">온도 (°C)</text>`;
-  s+=`<text x="${ml}" y="${subTop-6}" font-size="10" fill="#666"><tspan fill="${FIRE_C}" font-weight="700">Fire</tspan> (계단) · <tspan fill="${DAMP_C}" font-weight="700">Damper</tspan> ÷${DAMP_DIV} (점)</text>`;
+  s+=`<text x="${ml}" y="${subTop-6}" font-size="10" fill="#666"><tspan fill="${FIRE_C}" font-weight="700">Fire</tspan> (계단) · <tspan fill="${DAMP_C}" font-weight="700">Damper</tspan> ${scaleTxt(dk)} (점)</text>`;
 
   /* 위: Drum(실선) · Exhaust(점선) — 둥근 곡선 */
   const px=p=>p.map(q=>[sx(q[0]),syM(q[1])]);
@@ -244,7 +260,7 @@ function chartSVG(W,H,d){
   d.fire.slice(1).forEach(p=>{fp+=`H${sx(p[0]/60)}V${syS(p[1])}`;prev=p[1]});
   fp+=`H${sx(Math.max(xEnd,d.fire[d.fire.length-1][0]/60))}`;
   s+=`<path d="${fp}" fill="none" stroke="${FIRE_C}" stroke-width="2.4" stroke-linejoin="round"/>`;
-  const dp=d.damper.map(p=>[sx(p[0]/60),syS(p[1]/DAMP_DIV)]);
+  const dp=d.damper.map(p=>[sx(p[0]/60),syS(p[1]*dk)]);
   if(dp.length>=2)s+=`<polyline points="${dp.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')}" fill="none" stroke="${DAMP_C}" stroke-width="1.8" stroke-linejoin="round"/>`;
   const lastD=dp[dp.length-1],endX=sx(Math.max(xEnd,d.damper[d.damper.length-1][0]/60));
   if(endX>lastD[0]+1)s+=`<line x1="${lastD[0]}" y1="${lastD[1]}" x2="${endX}" y2="${lastD[1]}" stroke="${DAMP_C}" stroke-width="1.4" stroke-dasharray="3 3" stroke-opacity=".7"/>`;
@@ -271,8 +287,12 @@ function showResults(){
   const d=collect();current=d;Work.renderHeads();
   const r=summarize(d);
   $('rDT').textContent=fmt(r.dt);$('rDTR').textContent=ok(r.dtr)?r.dtr.toFixed(1)+'%':'—';$('rLoss').textContent=ok(r.loss)?r.loss.toFixed(1)+'%':'—';
+  const pc=n=>ok(n)?n.toFixed(1)+'%':'—';
+  $('rDry').textContent=pc(r.dry);$('rPhase').textContent=pc(r.phase);$('rDTp').textContent=pc(r.dtp);
+  $('rSum').textContent=ok(r.sum)?`합계 ${r.sum.toFixed(1)}%`:'';
   const notes=[];
   if(!ok(r.dt))notes.push('배출 시간이 1차 크랙 시간보다 늦어야 DT를 계산할 수 있어요.');
+  else if(!ok(r.dry))notes.push('Yellow P → 1st pop → 배출 순서의 시간이어야 구간 비율을 계산할 수 있어요.');
   if(d.wIn>0&&d.wOut>0&&d.wOut>d.wIn)notes.push('배출 무게가 투입 무게보다 커서 중량 손실률을 계산할 수 없어요.');
   $('rNote').textContent=notes.join(' ');
   renderROR(d);renderEvents(d);renderControls(d);
