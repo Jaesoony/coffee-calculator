@@ -94,8 +94,43 @@
   });
   // 입력하면 빨간 표시 해제
   document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('miss','bad')});
-  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.id==='resetKeep')resetKeep()});
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.id==='resetKeep')resetKeep();const id=e.target.id;if(id==='draftBtn')draftSave();else if(id==='draftLoad')draftLoad();else if(id==='draftDel')draftDel()});
 
+
+
+  // 임시저장 — 입력창 전체(동적인 줄 포함)를 이 기기의 브라우저에 저장. 다음에 열면 불러올지 물어본다.
+  const DKEY='cc:draft:'+(location.pathname.split('/').pop()||'index').replace('.html','');
+  let toastTimer=0;
+  function toast(msg){
+    let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}
+    t.textContent=msg;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('on'),2600);
+  }
+  const hhmm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+  function draftSave(){
+    try{
+      const f={};document.querySelectorAll('#inputView input[id],#inputView select[id]').forEach(el=>{f[el.id]=el.value});
+      const o={t:Date.now(),f};if(window.DraftHooks)o.x=window.DraftHooks.collect();
+      localStorage.setItem(DKEY,JSON.stringify(o));
+      const bar=$('draftBar');if(bar)bar.remove();
+      toast('임시저장했어요 · '+hhmm(new Date()));
+    }catch(_){toast('저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요.')}
+  }
+  function readDraft(){try{return JSON.parse(localStorage.getItem(DKEY)||'null')}catch(_){return null}}
+  function showDraftBar(){
+    const o=readDraft(),box=$('workInfo');if(!o||!box||!$('draftBtn'))return;
+    const d=new Date(o.t),memo=(o.f&&o.f.wk_memo)||'';
+    const bar=document.createElement('div');bar.id='draftBar';bar.className='restored';
+    bar.innerHTML=`<span><b>임시저장된 작업이 있어요</b><br><small>${d.getMonth()+1}.${pad(d.getDate())} ${hhmm(d)}${memo?' · '+esc(memo):''}</small></span><span class="btns"><button type="button" id="draftLoad">불러오기</button><button type="button" id="draftDel">삭제</button></span>`;
+    box.parentNode.insertBefore(bar,box);
+  }
+  function draftLoad(){
+    const o=readDraft();if(!o)return;
+    Object.keys(o.f||{}).forEach(id=>{const el=$(id);if(el){el.value=o.f[id];fire(el)}});
+    if(window.DraftHooks&&o.x)window.DraftHooks.apply(o.x);
+    const bar=$('draftBar');if(bar)bar.remove();
+    toast('임시저장한 작업을 불러왔어요');
+  }
+  function draftDel(){try{localStorage.removeItem(DKEY)}catch(_){}const bar=$('draftBar');if(bar)bar.remove();toast('임시저장을 삭제했어요')}
 
   // 마지막 입력값 기억 — 이 기기의 브라우저 안에만 저장 (로그인 불필요). 저장 대상은 data-keep 표시가 있는 칸.
   const KEY='cc:keep:'+(location.pathname.split('/').pop()||'index').replace('.html','');
@@ -122,7 +157,8 @@
     saveKeep();
   }
   ['input','change'].forEach(t=>document.addEventListener(t,e=>{if(e.target.matches&&e.target.matches('[data-keep]'))saveKeep()}));
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreKeep);else restoreKeep();
+  const boot=()=>{showDraftBar();restoreKeep()};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 
   window.Work={info,missing,renderHeads,print,fmtDate,fileTitle};
   init();

@@ -31,10 +31,9 @@ const nf=n=>ok(n)?(Number.isInteger(n)?String(n):String(+n.toFixed(2))):'';
 /* ---------- 이벤트 입력칸 (항목 | 입력칸, 단위 표시) ---------- */
 function buildEvents(){
   $('evInputs').innerHTML=EVENTS.map(e=>{
-    const star=e.req?'<b class="req">*</b>':'';
-    return `<div class="evbox"><div class="evtitle">${e.name}${e.req?'':'<span class="opt">(선택)</span>'}</div>
-<div class="frow"><label class="flabel" for="${e.k}_t">시간 (분:초)${star}</label><input id="${e.k}_t" class="tin" inputmode="numeric" placeholder="예: 8:30 또는 830"></div>
-<div class="frow"><label class="flabel" for="${e.k}_c">온도 (°C)${star}</label><input id="${e.k}_c" type="number" inputmode="decimal" step="0.1" placeholder="예: 196"></div></div>`;
+    const star=e.req?'<b class="req">*</b>':'',nm=`<b>${e.name}</b>${star}${e.req?'':'<em>(선택)</em>'}`;
+    return `<div class="evrow2"><div class="field"><label for="${e.k}_t" class="evl">${nm}<i>시간 · 분:초</i></label><input id="${e.k}_t" class="tin" inputmode="numeric" placeholder="예: 8:30"></div>`+
+      `<div class="field"><label for="${e.k}_c" class="evl">${nm}<i>온도 · °C</i></label><input id="${e.k}_c" type="number" inputmode="decimal" step="0.1" placeholder="예: 196"></div></div>`;
   }).join('');
 }
 
@@ -327,6 +326,23 @@ function updateDots(){
   $('prevBtn').disabled=idx<=0;$('nextBtn').disabled=idx>=n-1;
 }
 function step(dir){const box=$('pages');box.scrollBy({left:dir*box.clientWidth,behavior:'smooth'})}
+
+/* ---------- 임시저장: 1분 기록·조작 기록처럼 동적인 칸도 함께 저장/복원 (common.js가 호출) ---------- */
+window.DraftHooks={
+  collect(){
+    return{rows,
+      table:Array.from(document.querySelectorAll('#rtable input[data-k]')).filter(el=>el.value!=='').map(el=>[+el.dataset.r,el.dataset.k,el.value]),
+      ctl:readCtl().map(c=>({t:c.tE.value,k:c.k,v:c.vE.value}))};
+  },
+  apply(x){
+    while(rows<x.rows&&rows<MAX_ROWS)addRow();
+    while(rows>x.rows&&rows>1)delRow();
+    document.querySelectorAll('#rtable input[data-k]').forEach(el=>{el.value=''});
+    (x.table||[]).forEach(([r,k,v])=>{const el=cell(r,k);if(el)el.value=v});
+    $('ctlList').innerHTML='';
+    (x.ctl||[]).forEach(c=>{addCtl(false);const l=$('ctlList').lastElementChild,k=l.querySelector('.c-k');l.querySelector('.c-t').value=c.t;k.value=c.k;k.dispatchEvent(new Event('change',{bubbles:true}));l.querySelector('.c-v').value=c.v});
+  }
+};
 
 /* ---------- 이벤트 연결 ---------- */
 buildEvents();for(let i=0;i<START_ROWS;i++)addRow();

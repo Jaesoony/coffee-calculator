@@ -102,7 +102,29 @@ table.data td:first-child,table.data th:first-child{text-align:left}
 
 .restored{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#eef5ff;border:1px solid #cfe0f7;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:#33507a;line-height:1.45}
 .restored button{width:auto;min-height:34px;padding:0 12px;font-size:13px;white-space:nowrap;background:#fff;color:#222;border:1px solid #c9d3e2}
+/* 하단 고정 바 (임시저장 · 결과보기) */
+.has-bar{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.96);border-top:1px solid #e3e3e3;box-shadow:0 -4px 14px rgba(0,0,0,.07);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ab-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1.7fr;gap:10px}
+.actionbar button{min-height:48px;margin:0}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#111;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
+.toast.on{opacity:1}
+.restored .btns{display:flex;gap:6px}
+.restored small{color:#6b84a8;font-size:12px}
+/* 이벤트 입력: 한 줄에 시간 · 온도 2칸 */
+.evrow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;align-items:end}
+.evrow2 .field{margin:0}
+.evl{display:block;margin:0 0 5px;font-size:13px;line-height:1.3}
+.evl b{font-weight:800}
+.evl em{font-style:normal;color:#888;font-weight:500;font-size:12px;margin-left:4px}
+.evl i{display:block;font-style:normal;font-weight:500;color:#888;font-size:11px}
+/* 메인 화면 업데이트 소식 */
+.news .nd{font-weight:800;font-size:13px;margin-top:2px}
+.news ul{margin:6px 0 14px 18px;padding:0;font-size:13px;color:#444;line-height:1.75}
+.news summary{cursor:pointer;font-size:13px;font-weight:700;color:#555;padding:6px 0}
+.newchip{display:inline-block;background:#c53b30;color:#fff;border-radius:6px;padding:1px 6px;font-size:10px;margin-left:6px;vertical-align:1px}
 @media print{
+  .actionbar,.toast{display:none!important}
   .restored{display:none!important}
   @page{size:A4;margin:12mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
