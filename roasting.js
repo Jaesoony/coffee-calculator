@@ -151,6 +151,20 @@ function renderROR(d){
   }
   $('rorTable').innerHTML=h+'</table>';
 }
+// 구간 막대: 각 구간의 가로 폭이 비율(%)에 맞게 달라진다. 막대 안에는 % + 시간(줄바꿈), 아래 범례에는 이름·권장값.
+function renderPhases(r,d){
+  const bar=$('phaseBar'),lg=$('phaseLegend');
+  if(!ok(r.dry)){bar.innerHTML='';lg.innerHTML='';$('rSum').textContent='';return}
+  const t=d.ev;
+  const P=[
+    {cls:'s1',name:'Drying phase',ko:'수분날리기',pct:r.dry,sec:t.yp.t,tgt:35},
+    {cls:'s2',name:'Maillard phase',ko:'Roasting Phase',pct:r.phase,sec:t.c1.t-t.yp.t,tgt:45},
+    {cls:'s3',name:'Development phase',ko:'DT',pct:r.dtp,sec:t.out.t-t.c1.t,tgt:20}
+  ];
+  bar.innerHTML=P.map(p=>`<div class="ps ${p.cls}${p.pct<12?' sm':''}" style="width:${p.pct}%"${p.pct<6?' title="'+p.name+' '+p.pct.toFixed(1)+'%"':''}>${p.pct>=6?`<b>${p.pct.toFixed(1)}%</b><span>${fmt(p.sec)}</span>`:''}</div>`).join('');
+  lg.innerHTML=P.map(p=>`<div class="lg"><i class="dot ${p.cls}"></i><span class="nm">${p.name}<em>${p.ko}</em></span><span class="vv">${p.pct.toFixed(1)}% · ${fmt(p.sec)}</span><span class="tg">권장 ${p.tgt}%</span></div>`).join('');
+  $('rSum').textContent=`Total Duration Time ${fmt(t.out.t)} · 합계 ${r.sum.toFixed(1)}%`;
+}
 function renderEvents(d){
   let h='<table class="data"><tr><th>이벤트</th><th>시간</th><th>온도</th></tr>';
   EVENTS.forEach(e=>{const v=d.ev[e.k];if(ok(v.t)||ok(v.c))h+=`<tr><td>${e.name}</td><td>${ok(v.t)?fmt(v.t):''}</td><td>${f1(v.c)}</td></tr>`});
@@ -287,9 +301,7 @@ function showResults(){
   const d=collect();current=d;Work.renderHeads();
   const r=summarize(d);
   $('rDT').textContent=fmt(r.dt);$('rDTR').textContent=ok(r.dtr)?r.dtr.toFixed(1)+'%':'—';$('rLoss').textContent=ok(r.loss)?r.loss.toFixed(1)+'%':'—';
-  const pc=n=>ok(n)?n.toFixed(1)+'%':'—';
-  $('rDry').textContent=pc(r.dry);$('rPhase').textContent=pc(r.phase);$('rDTp').textContent=pc(r.dtp);
-  $('rSum').textContent=ok(r.sum)?`합계 ${r.sum.toFixed(1)}%`:'';
+  renderPhases(r,d);
   const notes=[];
   if(!ok(r.dt))notes.push('배출 시간이 1차 크랙 시간보다 늦어야 DT를 계산할 수 있어요.');
   else if(!ok(r.dry))notes.push('Yellow P → 1st pop → 배출 순서의 시간이어야 구간 비율을 계산할 수 있어요.');
