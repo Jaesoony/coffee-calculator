@@ -3,7 +3,7 @@
 <!-- 입력 화면 -->
 <div id="inputView">
 <div id="workInfo" data-kind="원두" data-title="브루잉 추출 계산기"></div>
-<section class="card"><div class="grid"><div class="field"><label for="dose">원두 무게 (g)</label><input id="dose" type="number" inputmode="decimal" step="0.1" placeholder="예: 15"></div><div class="field"><label for="water">투입 물 무게 (g)</label><input id="water" type="number" inputmode="decimal" step="1" placeholder="예: 250"></div></div>
+<section class="card"><div class="grid"><div class="field"><label for="dose">원두 무게 (g)</label><input id="dose" data-keep type="number" inputmode="decimal" step="0.1" placeholder="예: 15"></div><div class="field"><label for="water">투입 물 무게 (g)</label><input id="water" data-keep type="number" inputmode="decimal" step="1" placeholder="예: 250"></div></div>
 <div class="grid"><div class="field"><label for="beverage">실제 추출된 커피 무게 (g)</label><input id="beverage" type="number" inputmode="decimal" step="0.1" placeholder="예: 220"></div><div class="field"><label for="tds">TDS (%)</label><input id="tds" type="number" inputmode="decimal" step="0.01" placeholder="예: 1.30"></div></div>
 <div class="guide"><div class="row"><span>Brew Ratio</span><span class="badge" id="ratio">—</span></div><div class="small">Brew Ratio = 물 무게 ÷ 원두 무게</div></div>
 <div id="msg" class="input-alert high" hidden></div>

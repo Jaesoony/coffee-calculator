@@ -86,7 +86,11 @@ table.data td:first-child,table.data th:first-child{text-align:left}
 .actions{margin-bottom:13px}
 .btn-ghost{background:#fff;color:#222;border:1px solid #ddd}
 .actions .btn-ghost{min-height:44px;font-size:15px}
+
+.restored{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#eef5ff;border:1px solid #cfe0f7;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:#33507a;line-height:1.45}
+.restored button{width:auto;min-height:34px;padding:0 12px;font-size:13px;white-space:nowrap;background:#fff;color:#222;border:1px solid #c9d3e2}
 @media print{
+  .restored{display:none!important}
   @page{size:A4;margin:12mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   html,body{background:#fff!important}

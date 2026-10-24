@@ -17,7 +17,7 @@
 
   function field(f){
     const [k,label,ph,type]=f;
-    return `<div class="field"><label for="wk_${k}">${label}</label><input id="wk_${k}" ${type==='number'?'type="number" inputmode="decimal" step="any"':'type="text" maxlength="60"'} placeholder="${ph}" autocomplete="off"></div>`;
+    return `<div class="field"><label for="wk_${k}">${label}</label><input id="wk_${k}" ${type==='number'?'type="number" inputmode="decimal" step="any"':'type="text" maxlength="60"'} placeholder="${ph}" autocomplete="off" data-keep></div>`;
   }
   function init(){
     const box=$('workInfo');if(!box)return;
@@ -27,7 +27,7 @@
     const all=DETAIL.concat(cfg.extra.map(k=>EXTRA[k]));
     box.innerHTML=`<section class="card" id="wkCard"><h2>작업 정보</h2>
 <div class="field"><label for="wk_memo">Memo<b class="req">*</b></label><input id="wk_memo" type="text" maxlength="60" placeholder="이 작업의 키워드 (예: 케냐 로스팅 테스트 3차)" autocomplete="off"></div>
-<div class="field"><label for="wk_bean">${cfg.kind==='생두'?'생두':'원두'}<b class="req">*</b></label><input id="wk_bean" type="text" maxlength="80" placeholder="예: 브라질 세하도 / 콜롬비아 엘 디비소 내추럴" autocomplete="off"></div>
+<div class="field"><label for="wk_bean">${cfg.kind==='생두'?'생두':'원두'}<b class="req">*</b></label><input id="wk_bean" type="text" maxlength="80" placeholder="예: 브라질 세하도 / 콜롬비아 엘 디비소 내추럴" autocomplete="off" data-keep></div>
 <div class="field"><label for="wk_date">날짜</label><input id="wk_date" type="date" value="${today()}"></div>
 <details class="wk-more"><summary>상세 정보 (국가 · 지역 · 품종 · 가공 …)</summary><div class="wk-grid">${all.map(field).join('')}</div></details>
 <div id="wkMsg" class="input-alert high" hidden></div></section>`;
@@ -94,7 +94,35 @@
   });
   // 입력하면 빨간 표시 해제
   document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('miss','bad')});
-  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print()});
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.id==='resetKeep')resetKeep()});
+
+
+  // 마지막 입력값 기억 — 이 기기의 브라우저 안에만 저장 (로그인 불필요). 저장 대상은 data-keep 표시가 있는 칸.
+  const KEY='cc:keep:'+(location.pathname.split('/').pop()||'index').replace('.html','');
+  const keepEls=()=>Array.from(document.querySelectorAll('[data-keep]'));
+  const fire=el=>{el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};
+  function saveKeep(){try{const o={};keepEls().forEach(el=>{o[el.id]=el.value});localStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
+  function showBanner(){
+    const box=$('workInfo');if($('restoredBar')||!box)return;
+    const bar=document.createElement('div');bar.id='restoredBar';bar.className='restored';
+    bar.innerHTML='<span>지난번 입력값을 불러왔어요. 새로 시작하려면 초기화하세요.</span><button type="button" id="resetKeep">입력 초기화</button>';
+    box.parentNode.insertBefore(bar,box);
+  }
+  function restoreKeep(){
+    let o=null;try{o=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
+    if(!o)return;
+    let n=0;
+    keepEls().forEach(el=>{const v=o[el.id];if(v!==undefined&&v!==''&&el.value!==v){el.value=v;fire(el);n++}});
+    if(n)showBanner();
+  }
+  function resetKeep(){
+    try{localStorage.removeItem(KEY)}catch(_){}
+    keepEls().forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';fire(el)});
+    const b=$('restoredBar');if(b)b.remove();
+    saveKeep();
+  }
+  ['input','change'].forEach(t=>document.addEventListener(t,e=>{if(e.target.matches&&e.target.matches('[data-keep]'))saveKeep()}));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreKeep);else restoreKeep();
 
   window.Work={info,missing,renderHeads,print,fmtDate,fileTitle};
   init();
