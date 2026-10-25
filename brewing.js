@@ -62,6 +62,7 @@ function chartSVG(W,H,ey,t){
 }
 
 function chartHeight(W){
+  if(window.innerWidth>=720)return Math.round(W<480?W*1.0:W*0.85);   // 가로·태블릿·PC
   const landscapePhone=window.matchMedia('(orientation:landscape) and (max-height:520px)').matches;
   if(landscapePhone)return Math.round(Math.max(220,Math.min(W*0.5,window.innerHeight-110)));
   return Math.round(W<480?W*1.1:W*0.85);
@@ -132,3 +133,9 @@ $('pages').addEventListener('scroll',updateDots);
 if('ResizeObserver' in window)new ResizeObserver(drawChart).observe($('chart'));
 window.addEventListener('resize',drawChart);
 updateRatio();
+
+/* 공유: 결과 요약 문구 (common.js가 호출) */
+window.ShareHook=function(){
+  const{d,w,b,t}=readInputs();if(!(d>0&&b>0&&t>0))return[];
+  return[`추출수율 ${(b*t/d).toFixed(2)}% · Brew Ratio 1 : ${(w/d).toFixed(2)}`,`원두 ${d}g · 물 ${w}g · 추출량 ${b}g · TDS ${t}%`];
+};

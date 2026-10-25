@@ -65,21 +65,42 @@
   function renderHeads(){document.querySelectorAll('.rhead').forEach(el=>{el.innerHTML=headHTML()})}
 
   function fileTitle(){const o=info();return (o.date.replace(/-/g,'')+' '+(o.memo||o.title)).trim()}
-  function print(){
+  // 기본 정보(Memo·원두/생두)가 비어 있으면 안내 (인쇄·공유 공통)
+  function ensureInfo(){
     const miss=missing(),msg=$('wkMsg');
     if(miss.length){
       miss.forEach(m=>$(m.id).classList.add('miss'));
-      if(msg){msg.textContent=miss.map(m=>m.name).join(', ')+' 항목을 입력해 주세요. 인쇄물 맨 위에 표시되는 기본 정보예요.';msg.hidden=false}
+      if(msg){msg.textContent=miss.map(m=>m.name).join(', ')+' 항목을 입력해 주세요.';msg.hidden=false}
       const card=$('wkCard');if(card)card.scrollIntoView({block:'center',behavior:'smooth'});
       return false;
     }
     if(msg)msg.hidden=true;
+    return true;
+  }
+  function print(){
+    if(!ensureInfo())return false;
     renderHeads();
     const old=document.title;document.title=fileTitle();           // PDF 기본 파일명
     const restore=()=>{document.title=old;window.removeEventListener('afterprint',restore)};
     window.addEventListener('afterprint',restore);setTimeout(restore,8000);
     window.print();
     return true;
+  }
+  // 공유: 기기의 공유 창(메신저·문자 등)으로 결과 요약을 보낸다. 공유 창이 없으면 복사.
+  async function share(){
+    if(!ensureInfo())return;
+    const o=info(),kind=cfg.title.replace(/\s*추출\s*계산기/,''),lines=window.ShareHook?window.ShareHook():[];
+    const text=[o.memo||o.title,[o.bean,fmtDate(o.date),kind].filter(Boolean).join(' · ')].concat(lines).join('\n');
+    const url=location.href.split(/[?#]/)[0].replace(/[^/]*$/,'');
+    try{if(navigator.share){await navigator.share({title:o.memo||o.title,text,url});return}}
+    catch(e){if(e&&e.name==='AbortError')return}
+    const full=text+'\n'+url;
+    try{await navigator.clipboard.writeText(full);toast('결과 요약을 복사했어요')}
+    catch(_){
+      const ta=document.createElement('textarea');ta.value=full;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');toast('결과 요약을 복사했어요')}catch(__){toast('이 환경에서는 공유할 수 없어요')}
+      ta.remove();
+    }
   }
 
   // Enter → 다음 입력칸 (보이는 입력칸만, 한글 입력 중에는 제외)
@@ -94,7 +115,7 @@
   });
   // 입력하면 빨간 표시 해제
   document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('miss','bad')});
-  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.id==='resetKeep')resetKeep();const id=e.target.id;if(id==='draftBtn')draftSave();else if(id==='draftLoad')draftLoad();else if(id==='draftDel')draftDel()});
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.closest&&e.target.closest('#shareBtn'))share();if(e.target.id==='resetKeep')resetKeep();const id=e.target.id;if(id==='draftBtn')draftSave();else if(id==='draftLoad')draftLoad();else if(id==='draftDel')draftDel()});
 
 
 
@@ -140,7 +161,7 @@
   function showBanner(){
     const box=$('workInfo');if($('restoredBar')||!box)return;
     const bar=document.createElement('div');bar.id='restoredBar';bar.className='restored';
-    bar.innerHTML='<span>지난번 입력값을 불러왔어요. 새로 시작하려면 초기화하세요.</span><button type="button" id="resetKeep">입력 초기화</button>';
+    bar.innerHTML='<span>지난번 입력값을 불러왔어요.</span><button type="button" id="resetKeep">입력 초기화</button>';
     box.parentNode.insertBefore(bar,box);
   }
   function restoreKeep(){
@@ -160,6 +181,6 @@
   const boot=()=>{showDraftBar();restoreKeep()};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 
-  window.Work={info,missing,renderHeads,print,fmtDate,fileTitle};
+  window.Work={info,missing,renderHeads,print,share,fmtDate,fileTitle};
   init();
 })();

@@ -1,14 +1,32 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>에스프레소 추출 계산기</title></head><body><main class="wrap"><div class="navback"><a href="index.html">← 계산기 선택</a></div><h1>☕ 에스프레소 추출 계산기</h1>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>에스프레소 추출 계산기</title></head><body><main class="wrap"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>☕ 에스프레소 추출 계산기</h1></header>
+<div class="cols"><div class="col">
 <div id="workInfo" data-kind="원두" data-title="에스프레소 추출 계산기"></div><div class="card rhead print-only"></div>
 <section class="card"><div class="field"><label for="type">종류</label><select id="type" data-keep><option value="espresso">에스프레소</option><option value="ristretto">리스트레또</option><option value="lungo">룽고</option></select></div>
 <div class="grid"><div class="field"><label for="dose">도징량 (g)</label><input id="dose" data-keep type="number" inputmode="decimal" step="0.1" placeholder="예: 18"></div><div class="field"><label for="yield">추출량 (g)</label><input id="yield" data-keep type="number" inputmode="decimal" step="0.1" placeholder="예: 36"></div></div>
-<div id="yieldGuide" class="output-hint">도징량을 입력하면 권장 추출용량이 표시됩니다.</div>
+<div id="yieldGuide" class="output-hint">도징량을 입력하면 권장 추출량이 나와요.</div>
 <div class="grid"><div class="field"><label for="time">추출시간 (초)<span class="time-guide">권장 20~30 sec</span></label><input id="time" type="number" inputmode="decimal" step="1" placeholder="예: 26"></div><div class="field"><label for="tds">TDS (%)</label><input id="tds" type="number" inputmode="decimal" step="0.01" placeholder="예: 9.50"></div></div>
-<div id="timeStatus" class="input-alert">추출시간은 권장 범위 20~30초를 기준으로 표시합니다.</div>
-<div id="ratioGuide" class="guide"><div class="row"><span>권장 추출 비율</span><span class="badge" id="ratioText">에스프레소 1 : 2</span></div><div id="ratioStatus" class="small">도징량과 추출량을 입력하면 범위를 표시합니다.</div></div>
+<div id="timeStatus" class="input-alert">권장 추출시간은 20~30초예요.</div>
+<div id="ratioGuide" class="guide"><div class="row"><span>권장 추출 비율</span><span class="badge" id="ratioText">에스프레소 1 : 2</span></div><div id="ratioStatus" class="small">도징량과 추출량을 입력하면 비율을 확인해 드려요.</div></div>
 <button id="calcBtn" type="button">계산하기</button></section>
-<section class="card"><div class="result"><div class="resultbox"><div class="label">추출수율 (Extraction Yield)</div><div class="value" id="ey">—</div></div><div class="resultbox"><div class="label">EBF</div><div class="value" id="ebf">—</div></div></div></section>
-<section class="card noprint"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 / PDF 저장</button></section>
-<section class="card"><div style="font-weight:750">TDS 기준 가이드</div><div class="tdsbar"><div class="track"></div><div class="range-fill" id="rangeFill"></div><div class="marker" id="marker">•<span id="markerLabel"></span></div></div><div class="scale"><span id="minScale">2%</span><span id="maxScale">17%</span></div><div class="status" id="tdsStatus">TDS를 입력하면 기준 범위를 표시합니다.</div><div class="small">에스프레소 TDS 기준: 8~11%</div></section>
-<section class="card"><div style="font-weight:750;margin-bottom:8px">현재 기준값</div><div class="small">에스프레소: 1:2 · 리스트레또: 1:1 · 룽고: 1:3</div><div class="small">TDS: 8~11%</div><div class="small">추출시간: 20~30 sec</div><div class="small">권장 추출량 허용범위: 기준 추출량 ±3g</div></section>
-<script src="common.js"></script><script src="machine.js"></script></main></body></html>
+</div><div class="col">
+<section class="card">
+<div class="result"><div class="resultbox"><div class="label">추출수율 (Extraction Yield)</div><div class="value" id="ey">—</div></div><div class="resultbox"><div class="label">EBF</div><div class="value" id="ebf">—</div></div></div></section>
+<section class="card noprint"><div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 / PDF 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div></section>
+<section class="card"><div style="font-weight:750">TDS 기준 가이드</div><div class="tdsbar"><div class="track"></div><div class="range-fill" id="rangeFill"></div><div class="marker" id="marker">•<span id="markerLabel"></span></div></div><div class="scale"><span id="minScale">2%</span><span id="maxScale">17%</span></div><div class="status" id="tdsStatus">TDS를 입력하면 기준 범위와 비교해 드려요.</div><div class="small">에스프레소 TDS 기준: 8~11%</div></section>
+<section class="card"><div style="font-weight:750;margin-bottom:8px">기준값</div><div class="small">에스프레소: 1:2 · 리스트레또: 1:1 · 룽고: 1:3</div><div class="small">TDS: 8~11%</div><div class="small">추출시간: 20~30 sec</div><div class="small">추출량 허용범위: 권장량 ±3g</div></section>
+</div></div>
+<script src="common.js"></script><script src="machine.js"></script>
+<script>
+/* 공유: 결과 요약 문구 (common.js가 호출) */
+window.ShareHook=function(){
+  const g=id=>document.getElementById(id),t=g('type'),v=id=>g(id).value.trim(),L=[],a=[];
+  a.push(t.options[t.selectedIndex].text);
+  if(v('dose'))a.push('도징 '+v('dose')+'g');if(v('yield'))a.push('추출 '+v('yield')+'g');if(v('time'))a.push(v('time')+'초');
+  L.push(a.join(' · '));
+  const b=[];if(v('tds'))b.push('TDS '+v('tds')+'%');
+  if(g('ey').textContent.trim()!=='—')b.push('추출수율 '+g('ey').textContent.trim());
+  if(g('ebf').textContent.trim()!=='—')b.push('EBF '+g('ebf').textContent.trim());
+  if(b.length)L.push(b.join(' · '));
+  return L;
+};
+</script></main></body></html>

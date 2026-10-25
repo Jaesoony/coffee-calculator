@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id);
 
-/* ---------- 기준값 (세로축은 학원 기록지 양식 60~250°C, 가로축은 입력 길이에 맞춤) ---------- */
+/* ---------- 기준값 (세로축 60~250°C, 가로축은 입력 길이에 맞춤) ---------- */
 const X_FIT_MIN=5,Y_MIN=60,Y_MAX=250,START_ROWS=13,MAX_ROWS=31; // 0:00~12:00 13줄, 최대 30:00
 const FIRE_C='#d9480f',DAMP_C='#1c7ed6';
 const EVENTS=[
@@ -31,9 +31,10 @@ const nf=n=>ok(n)?(Number.isInteger(n)?String(n):String(+n.toFixed(2))):'';
 /* ---------- 이벤트 입력칸 (항목 | 입력칸, 단위 표시) ---------- */
 function buildEvents(){
   $('evInputs').innerHTML=EVENTS.map(e=>{
-    const star=e.req?'<b class="req">*</b>':'',nm=`<b>${e.name}</b>${star}${e.req?'':'<em>(선택)</em>'}`;
-    return `<div class="evrow2"><div class="field"><label for="${e.k}_t" class="evl">${nm}<i>시간 · 분:초</i></label><input id="${e.k}_t" class="tin" inputmode="numeric" placeholder="예: 8:30"></div>`+
-      `<div class="field"><label for="${e.k}_c" class="evl">${nm}<i>온도 · °C</i></label><input id="${e.k}_c" type="number" inputmode="decimal" step="0.1" placeholder="예: 196"></div></div>`;
+    const star=e.req?'<b class="req">*</b>':'';
+    return `<div class="evitem"><div class="evt">${e.name}${star}${e.req?'':'<em>(선택)</em>'}</div><div class="evrow2">`+
+      `<div class="field"><label for="${e.k}_t">시간 <i>(분:초)</i></label><input id="${e.k}_t" class="tin" inputmode="numeric" placeholder="예: 8:30"></div>`+
+      `<div class="field"><label for="${e.k}_c">온도 <i>(°C)</i></label><input id="${e.k}_c" type="number" inputmode="decimal" step="0.1" placeholder="예: 196"></div></div></div>`;
   }).join('');
 }
 
@@ -48,13 +49,13 @@ function addRow(){
 }
 function delRow(){if(rows<=1)return;$('rtable').lastElementChild.remove();rows--}
 
-/* ---------- Fire / Damper 조작 기록 (바꾼 순간만, 시간 + 항목 + 값) ---------- */
+/* ---------- Fire / Damper 조절 (바꾼 순간만, 시간 + 항목 + 값) ---------- */
 function addCtl(focus){
   const d=document.createElement('div');d.className='crow';
   d.innerHTML=`<label class="tcell"><span class="tl">시간<i>분:초</i></span><input class="tin c-t" inputmode="numeric" placeholder="예: 3:20"></label>`+
   `<label class="tcell"><span class="tl">항목<i></i></span><select class="c-k"><option value="fire">Fire</option><option value="damper">Damper</option></select></label>`+
   `<label class="tcell"><span class="tl">값<i></i></span><input class="c-v" type="number" inputmode="decimal" step="any" placeholder="예: 4"></label>`+
-  `<button class="xbtn" type="button" tabindex="-1" aria-label="이 조작 삭제">✕</button>`;
+  `<button class="xbtn" type="button" tabindex="-1" aria-label="이 조절 삭제">✕</button>`;
   $('ctlList').appendChild(d);
   if(focus)d.querySelector('.c-t').focus();
 }
@@ -64,7 +65,7 @@ function readCtl(){
     return{el,tE,vE,i:i+1,tRaw:tE.value.trim(),t:parseTime(tE.value),k:el.querySelector('.c-k').value,vRaw:vE.value.trim(),v:parseFloat(vE.value)};
   });
 }
-// 시점별 값: 가장 최근에 조작한 값이 이어진다.
+// 시점별 값: 가장 최근에 조절한 값이 이어진다.
 const valueAt=(s,t)=>{let v=s[0][1];for(const p of s){if(p[0]<=t)v=p[1];else break}return v};
 
 /* ---------- 수집·계산 ---------- */
@@ -77,7 +78,7 @@ function collect(){
   // ROR이 직전 1분보다 올라간 구간 표시 (터닝 포인트 이전 구간은 제외)
   const p=ok(ev.tp.t)?Math.ceil(ev.tp.t/60):1;
   for(let r=p+2;r<list.length;r++){if(ok(list[r].ror)&&ok(list[r-1].ror)&&list[r].ror>list[r-1].ror)list[r].flag=true}
-  // Fire / Damper 시계열: 0초(투입 설정) + 이후 조작
+  // Fire / Damper 시계열: 0초(투입 설정) + 이후 조절
   const ctl=readCtl().filter(c=>ok(c.t)&&ok(c.v));
   const mk=(k,init)=>[[0,init]].concat(ctl.filter(c=>c.k===k).sort((a,b)=>a.t-b.t).map(c=>[c.t,c.v]));
   return{list,ev,fire:mk('fire',num($('inFire'))),damper:mk('damper',num($('inDamper'))),
@@ -118,7 +119,7 @@ function checkRequired(){
   const badT=EVENTS.filter(x=>!empty($(x.k+'_t'))&&!ok(parseTime($(x.k+'_t').value)));
   badT.forEach(x=>$(x.k+'_t').classList.add('bad'));
   if(badT.length)lines.push(`시간 형식 확인: ${badT.map(x=>x.name).join(', ')} (예: 8:30 또는 830, 초는 59까지)`);
-  // Fire/Damper 조작 기록: 완전히 비어 있으면 무시, 일부만 채웠으면 알림
+  // Fire/Damper 조절: 완전히 비어 있으면 무시, 일부만 채웠으면 알림
   const cl=[];
   readCtl().forEach(c=>{
     if(!c.tRaw&&!c.vRaw)return;
@@ -127,7 +128,7 @@ function checkRequired(){
     if(!c.vRaw||!ok(c.v)){mark(c.vE);prob.push('값')}
     if(prob.length)cl.push(`${c.i}번째(${prob.join(', ')})`);
   });
-  if(cl.length)lines.push(`Fire/Damper 조작 기록: ${cl.join(', ')}`);
+  if(cl.length)lines.push(`Fire/Damper 조절: ${cl.join(', ')}`);
   // 1분 간격 기록: 배출 시간의 분(예: 10:30이면 10분)까지 Drum 필수, Exhaust는 선택
   const outT=parseTime($('out_t').value),last=ok(outT)?Math.min(rows-1,Math.floor(outT/60)):0,m=[];
   for(let r=0;r<=last;r++){if(empty(cell(r,'dr'))){mark(cell(r,'dr'));m.push(r)}}
@@ -285,6 +286,7 @@ function chartSVG(W,H,d){
   return{svg:s+'</svg>',points:dr.length+ex.length};
 }
 function chartHeight(W){
+  if(window.innerWidth>=720)return Math.round(W<480?W*1.0:W*0.85);   // 가로·태블릿·PC
   if(window.matchMedia('(orientation:landscape) and (max-height:520px)').matches)return Math.round(Math.max(250,Math.min(W*0.55,window.innerHeight-110)));
   return Math.round(W<480?W*1.15:W*0.8);
 }
@@ -327,7 +329,7 @@ function updateDots(){
 }
 function step(dir){const box=$('pages');box.scrollBy({left:dir*box.clientWidth,behavior:'smooth'})}
 
-/* ---------- 임시저장: 1분 기록·조작 기록처럼 동적인 칸도 함께 저장/복원 (common.js가 호출) ---------- */
+/* ---------- 임시저장: 1분 기록·조절처럼 동적인 칸도 함께 저장/복원 (common.js가 호출) ---------- */
 window.DraftHooks={
   collect(){
     return{rows,
@@ -344,9 +346,19 @@ window.DraftHooks={
   }
 };
 
+/* ---------- 공유: 결과 요약 문구 (common.js가 호출) ---------- */
+window.ShareHook=function(){
+  const d=current;if(!d)return[];
+  const r=summarize(d),pc=n=>ok(n)?n.toFixed(1)+'%':'—',L=[`DT ${fmt(r.dt)} · DTR ${pc(r.dtr)} · 중량 손실률 ${pc(r.loss)}`];
+  if(ok(r.dry)){const t=d.ev;L.push(`Drying ${pc(r.dry)} (${fmt(t.yp.t)}) · Maillard ${pc(r.phase)} (${fmt(t.c1.t-t.yp.t)}) · Development ${pc(r.dtp)} (${fmt(t.out.t-t.c1.t)})`)}
+  const w=[];if(d.wIn>0)w.push(`투입 ${d.wIn}g`);if(d.wOut>0)w.push(`배출 ${d.wOut}g`);if(ok(d.agWB))w.push(`Agtron WB ${d.agWB}`);
+  if(w.length)L.push(w.join(' · '));
+  return L;
+};
+
 /* ---------- 이벤트 연결 ---------- */
 buildEvents();for(let i=0;i<START_ROWS;i++)addRow();
-// 시간 칸(이벤트·조작 기록 공통): 칸을 벗어나면 분:초로 정리 (057 → 0:57)
+// 시간 칸(이벤트·조절 공통): 칸을 벗어나면 분:초로 정리 (057 → 0:57)
 document.addEventListener('focusout',e=>{const el=e.target;if(el.classList&&el.classList.contains('tin')){const s=parseTime(el.value);if(ok(s))el.value=fmt(s)}});
 document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('miss','bad')});
 $('ctlList').addEventListener('click',e=>{const b=e.target.closest('.xbtn');if(b)b.closest('.crow').remove()});
