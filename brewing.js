@@ -139,3 +139,12 @@ window.ShareHook=function(){
   const{d,w,b,t}=readInputs();if(!(d>0&&b>0&&t>0))return[];
   return[`추출수율 ${(b*t/d).toFixed(2)}% · Brew Ratio 1 : ${(w/d).toFixed(2)}`,`원두 ${d}g · 물 ${w}g · 추출량 ${b}g · TDS ${t}%`];
 };
+
+/* 결과지 이미지: 이미지에 담을 내용 (sheet.js가 그림) */
+window.SheetHook=function(){
+  const{d,w,b,t}=readInputs();if(!(d>0&&b>0&&t>0))return[];
+  const ey=b*t/d;
+  return[[{t:'metrics',items:[{label:'추출수율',value:ey.toFixed(2)+'%'},{label:'Brew Ratio',value:'1 : '+(w/d).toFixed(2)},{label:'TDS',value:t.toFixed(2)+'%'}]},
+          {t:'lines',lines:[{text:`원두 ${d} g · 물 ${w} g · 추출량 ${b} g`}]}],
+         [{t:'chart',title:'SCA Brewing Control Chart',svg:chartSVG(400,460,ey,t),w:400,h:460}]];
+};

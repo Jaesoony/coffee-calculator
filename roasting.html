@@ -1,9 +1,9 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>로스팅 추출 계산기</title></head><body><main class="wrap wrap-flex has-bar"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>🔥 로스팅 추출 계산기</h1></header>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css?v=20261027b"><title>로스팅 계산기</title></head><body><main class="wrap wrap-flex has-bar"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>🔥 로스팅 계산기</h1></header>
 
 <!-- 입력 화면 -->
 <div id="inputView">
 <div class="cols"><div class="col">
-<div id="workInfo" data-kind="생두" data-title="로스팅 추출 계산기" data-extra="moisture,density"></div>
+<div id="workInfo" data-kind="생두" data-title="로스팅 계산기" data-extra="moisture,density"></div>
 <div class="small reqnote"><b class="req">*</b> 표시는 필수 입력이에요. 2nd pop과 Exhaust는 선택이에요.</div>
 
 <section class="card"><h2>기본 정보</h2>
@@ -41,7 +41,7 @@
 <div class="card rhead"></div>
 <div class="toolbar"><button id="backBtn" class="ghost" type="button">← 입력 수정</button><div class="seg" role="group" aria-label="보기 방식"><button id="modeScroll" type="button" aria-pressed="true">세로 스크롤</button><button id="modeSwipe" type="button" aria-pressed="false">가로 넘기기</button></div></div>
 
-<div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 / PDF 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div>
+<div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 · PDF</button><button id="imgBtn" class="btn-ghost" type="button">🖼 이미지 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div>
 
 <div id="pages" class="pages scroll">
 <div class="page" id="page1">
@@ -80,4 +80,4 @@
 <div id="pager" class="pager" hidden><button id="prevBtn" type="button" aria-label="이전">‹</button><div id="dots" class="dots"></div><button id="nextBtn" type="button" aria-label="다음">›</button></div>
 </div>
 
-<script src="common.js"></script><script src="roasting.js"></script></main></body></html>
+<script src="common.js?v=20261027b"></script><script src="sheet.js?v=20261027b"></script><script src="roasting.js?v=20261027b"></script></main></body></html>

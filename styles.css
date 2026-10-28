@@ -96,7 +96,10 @@ table.data td:first-child,table.data th:first-child{text-align:left}
 .rh-bean{font-size:16px;font-weight:700;margin-top:5px}
 .rh-detail{font-size:13px;color:#666;margin-top:5px;line-height:1.5}
 .rh-meta{font-size:12px;color:#888;margin-top:9px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.actions{display:flex;gap:8px;margin-bottom:13px}
+.actions>button{flex:1 1 0;min-width:0}
+.actions .btn-ghost{font-size:14px;padding:0 6px;white-space:nowrap}
+@media (max-width:420px){.actions .btn-ghost{font-size:13px;padding:0 3px}}
 .card .actions{margin:0}
 .btn-ghost{background:#fff;color:#222;border:1px solid #ddd}
 .actions .btn-ghost{min-height:44px;font-size:15px}
@@ -171,6 +174,6 @@ table.data td:first-child,table.data th:first-child{text-align:left}
   .pages,.pages.scroll,.pages.swipe{display:block!important;column-count:2;column-gap:18px;overflow:visible!important;scroll-snap-type:none}
   .pages .page{display:contents}
   .pages .card{break-inside:avoid;-webkit-column-break-inside:avoid}
-  .actions{max-width:460px}
+  .actions{max-width:560px}
   .ab-in{max-width:640px;grid-template-columns:1fr 1.7fr}
 }

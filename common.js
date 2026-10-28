@@ -55,6 +55,12 @@
     if(o.density)p.push('밀도 '+esc(o.density)+' g/L');
     return p.join(' · ');
   }
+  function detailText(o){
+    const p=[];['country','region','variety','process'].forEach(k=>{if(o[k])p.push(o[k])});
+    if(o.altitude)p.push('고도 '+o.altitude+' m');if(o.crop)p.push('수확 '+o.crop);
+    if(o.moisture)p.push('수분 '+o.moisture+'%');if(o.density)p.push('밀도 '+o.density+' g/L');
+    return p.join(' · ');
+  }
   function headHTML(){
     const o=info(),d=detailLine(o);
     return `<div class="rh-title">${esc(o.memo||o.title)}</div>`+
@@ -86,12 +92,11 @@
     window.print();
     return true;
   }
-  // 공유: 기기의 공유 창(메신저·문자 등)으로 결과 요약을 보낸다. 공유 창이 없으면 복사.
-  async function share(){
-    if(!ensureInfo())return;
-    const o=info(),kind=cfg.title.replace(/\s*추출\s*계산기/,''),lines=window.ShareHook?window.ShareHook():[];
+  // 글 요약 공유(이미지 공유가 안 되는 환경의 대체 수단): 공유 창 → 없으면 복사
+  async function shareText(){
+    const o=info(),kind=cfg.title.replace(/\s*(추출\s*)?계산기/,''),lines=window.ShareHook?window.ShareHook():[];
     const text=[o.memo||o.title,[o.bean,fmtDate(o.date),kind].filter(Boolean).join(' · ')].concat(lines).join('\n');
-    const url=location.href.split(/[?#]/)[0].replace(/[^/]*$/,'');
+    const url=siteLink();
     try{if(navigator.share){await navigator.share({title:o.memo||o.title,text,url});return}}
     catch(e){if(e&&e.name==='AbortError')return}
     const full=text+'\n'+url;
@@ -101,6 +106,43 @@
       try{document.execCommand('copy');toast('결과 요약을 복사했어요')}catch(__){toast('이 환경에서는 공유할 수 없어요')}
       ta.remove();
     }
+  }
+
+  const siteLink=()=>location.href.split(/[?#]/)[0].replace(/[^/]*$/,'');
+  // ---------- 결과지 이미지 (저장 · 공유) ----------
+  const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  async function buildImage(){
+    if(!window.SheetHook||!window.Sheet)throw new Error('no sheet');
+    const o=info(),kind=cfg.title.replace(/\s*(추출\s*)?계산기/,'');
+    const r=window.Sheet.build({memo:o.memo||o.title,bean:o.bean,detail:detailText(o),meta:fmtDate(o.date)+' · '+kind},window.SheetHook());
+    const blob=await window.Sheet.toPng(r);
+    return{blob,name:fileTitle().replace(/[\\/:*?"<>|]/g,' ').replace(/\s+/g,' ').trim()+'.png'};
+  }
+  function download(blob,name){
+    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),5000);
+  }
+  async function saveImage(){
+    if(!ensureInfo())return;
+    toast('이미지를 만들고 있어요…');
+    let img;try{img=await buildImage()}catch(_){toast('이미지를 만들지 못했어요');return}
+    const file=new File([img.blob],img.name,{type:'image/png'});
+    if(isIOS()&&navigator.canShare&&navigator.canShare({files:[file]})){          // 아이폰·아이패드: 공유 창의 '이미지 저장'으로 사진에 저장
+      toast("공유 창에서 '이미지 저장'을 눌러 주세요");
+      try{await navigator.share({files:[file],title:info().memo||info().title})}catch(_){}
+      return;
+    }
+    download(img.blob,img.name);toast('이미지를 저장했어요');
+  }
+  // 공유: 결과지 이미지를 기기의 공유 창으로 보낸다. 이미지 공유가 안 되는 환경은 글 요약으로 대체.
+  async function share(){
+    if(!ensureInfo())return;
+    toast('이미지를 만들고 있어요…');
+    try{
+      const img=await buildImage(),file=new File([img.blob],img.name,{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:info().memo||info().title,text:'☕ 커피 계산기\n'+siteLink()});return}
+    }catch(e){if(e&&e.name==='AbortError')return}
+    await shareText();
   }
 
   // Enter → 다음 입력칸 (보이는 입력칸만, 한글 입력 중에는 제외)
@@ -115,7 +157,7 @@
   });
   // 입력하면 빨간 표시 해제
   document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('miss','bad')});
-  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.closest&&e.target.closest('#shareBtn'))share();if(e.target.id==='resetKeep')resetKeep();const id=e.target.id;if(id==='draftBtn')draftSave();else if(id==='draftLoad')draftLoad();else if(id==='draftDel')draftDel()});
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#printBtn'))print();if(e.target.closest&&e.target.closest('#shareBtn'))share();if(e.target.closest&&e.target.closest('#imgBtn'))saveImage();if(e.target.id==='resetKeep')resetKeep();const id=e.target.id;if(id==='draftBtn')draftSave();else if(id==='draftLoad')draftLoad();else if(id==='draftDel')draftDel()});
 
 
 
@@ -178,9 +220,10 @@
     saveKeep();
   }
   ['input','change'].forEach(t=>document.addEventListener(t,e=>{if(e.target.matches&&e.target.matches('[data-keep]'))saveKeep()}));
-  const boot=()=>{showDraftBar();restoreKeep()};
+  const canPrint=()=>!(isIOS()||/Android/i.test(navigator.userAgent));   // 폰·태블릿은 인쇄/PDF가 불안정해서 숨김
+  const boot=()=>{showDraftBar();restoreKeep();const pb=$('printBtn');if(pb&&!canPrint())pb.hidden=true};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 
-  window.Work={info,missing,renderHeads,print,share,fmtDate,fileTitle};
+  window.Work={info,missing,renderHeads,print,share,saveImage,fmtDate,fileTitle};
   init();
 })();

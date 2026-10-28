@@ -356,6 +356,29 @@ window.ShareHook=function(){
   return L;
 };
 
+/* ---------- 결과지 이미지: 이미지에 담을 내용 (sheet.js가 그림) ---------- */
+window.SheetHook=function(){
+  const d=current;if(!d)return[];
+  const r=summarize(d),t=d.ev,pc=n=>ok(n)?n.toFixed(1)+'%':'—';
+  const top=[{t:'metrics',items:[{label:'DT',value:fmt(r.dt)},{label:'DTR',value:pc(r.dtr)},{label:'중량 손실률',value:pc(r.loss)}]}];
+  const w=[];if(d.wIn>0&&d.wOut>0)w.push(`투입 ${d.wIn} g → 배출 ${d.wOut} g`);else{if(d.wIn>0)w.push(`투입 ${d.wIn} g`);if(d.wOut>0)w.push(`배출 ${d.wOut} g`)}
+  if(ok(d.agWB)||ok(d.agRGB))w.push('Agtron WB '+(ok(d.agWB)?d.agWB:'—')+' / RGB '+(ok(d.agRGB)?d.agRGB:'—'));
+  if(w.length)top.push({t:'lines',lines:[{text:w.join(' · ')}]});
+  if(ok(r.dry))top.push({t:'phase',total:fmt(t.out.t),sum:r.sum.toFixed(1)+'%',parts:[
+    {name:'Drying phase',ko:'수분날리기',pct:r.dry,time:fmt(t.yp.t),tgt:35},
+    {name:'Maillard phase',ko:'Roasting Phase',pct:r.phase,time:fmt(t.c1.t-t.yp.t),tgt:45},
+    {name:'Development phase',ko:'DT',pct:r.dtp,time:fmt(t.out.t-t.c1.t),tgt:20}]});
+  const cards=[top,[{t:'chart',title:'로스팅 프로파일',svg:chartSVG(400,440,d).svg,w:400,h:440}]];
+  const last=[];
+  const ror=d.list.filter(x=>ok(x.ror)).map(x=>({label:x.min+'분',value:(x.ror>0?'+':'')+x.ror.toFixed(1),flag:x.flag}));
+  if(ror.length)last.push({t:'strip',title:'ROR (°C/min)',items:ror,perRow:10,note:'빨간 굵은 숫자: 직전 1분보다 ROR이 올라간 구간'});
+  const rows=EVENTS.filter(e=>ok(t[e.k].t)||ok(t[e.k].c)).map(e=>[e.name,ok(t[e.k].t)?fmt(t[e.k].t):'—',ok(t[e.k].c)?t[e.k].c.toFixed(1)+'°C':'—']);
+  if(ok(d.inTemp))rows.push(['투입','0:00',d.inTemp.toFixed(1)+'°C']);
+  if(rows.length)last.push({t:'table',title:'이벤트',head:['이벤트','시간','온도'],rows});
+  if(last.length)cards.push(last);
+  return cards;
+};
+
 /* ---------- 이벤트 연결 ---------- */
 buildEvents();for(let i=0;i<START_ROWS;i++)addRow();
 // 시간 칸(이벤트·조절 공통): 칸을 벗어나면 분:초로 정리 (057 → 0:57)

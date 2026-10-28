@@ -1,9 +1,9 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>브루잉 추출 계산기</title></head><body><main class="wrap wrap-flex has-bar"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>☕ 브루잉 추출 계산기</h1></header>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css?v=20261027b"><title>브루잉 계산기</title></head><body><main class="wrap wrap-flex has-bar"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>☕ 브루잉 계산기</h1></header>
 
 <!-- 입력 화면 -->
 <div id="inputView">
 <div class="cols"><div class="col">
-<div id="workInfo" data-kind="원두" data-title="브루잉 추출 계산기"></div>
+<div id="workInfo" data-kind="원두" data-title="브루잉 계산기"></div>
 </div><div class="col">
 <section class="card"><div class="grid"><div class="field"><label for="dose">원두 무게 (g)</label><input id="dose" data-keep type="number" inputmode="decimal" step="0.1" placeholder="예: 15"></div><div class="field"><label for="water">투입 물 무게 (g)</label><input id="water" data-keep type="number" inputmode="decimal" step="1" placeholder="예: 250"></div></div>
 <div class="grid"><div class="field"><label for="beverage">실제 추출된 커피 무게 (g)</label><input id="beverage" type="number" inputmode="decimal" step="0.1" placeholder="예: 220"></div><div class="field"><label for="tds">TDS (%)</label><input id="tds" type="number" inputmode="decimal" step="0.01" placeholder="예: 1.30"></div></div>
@@ -19,7 +19,7 @@
 <div class="card rhead"></div>
 <div class="toolbar"><button id="backBtn" class="ghost" type="button">← 입력 수정</button><div class="seg" role="group" aria-label="보기 방식"><button id="modeScroll" type="button" aria-pressed="true">세로 스크롤</button><button id="modeSwipe" type="button" aria-pressed="false">가로 넘기기</button></div></div>
 
-<div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 / PDF 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div>
+<div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 · PDF</button><button id="imgBtn" class="btn-ghost" type="button">🖼 이미지 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div>
 
 <div id="pages" class="pages scroll">
 <div class="page" id="page1">
@@ -37,4 +37,4 @@
 <div id="pager" class="pager" hidden><button id="prevBtn" type="button" aria-label="이전">‹</button><div id="dots" class="dots"></div><button id="nextBtn" type="button" aria-label="다음">›</button></div>
 </div>
 
-<script src="common.js"></script><script src="brewing.js"></script></main></body></html>
+<script src="common.js?v=20261027b"></script><script src="sheet.js?v=20261027b"></script><script src="brewing.js?v=20261027b"></script></main></body></html>

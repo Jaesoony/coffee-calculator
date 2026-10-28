@@ -1,6 +1,6 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css"><title>에스프레소 추출 계산기</title></head><body><main class="wrap"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>☕ 에스프레소 추출 계산기</h1></header>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css?v=20261027b"><title>에스프레소 계산기</title></head><body><main class="wrap"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>☕ 에스프레소 계산기</h1></header>
 <div class="cols"><div class="col">
-<div id="workInfo" data-kind="원두" data-title="에스프레소 추출 계산기"></div><div class="card rhead print-only"></div>
+<div id="workInfo" data-kind="원두" data-title="에스프레소 계산기"></div><div class="card rhead print-only"></div>
 <section class="card"><div class="field"><label for="type">종류</label><select id="type" data-keep><option value="espresso">에스프레소</option><option value="ristretto">리스트레또</option><option value="lungo">룽고</option></select></div>
 <div class="grid"><div class="field"><label for="dose">도징량 (g)</label><input id="dose" data-keep type="number" inputmode="decimal" step="0.1" placeholder="예: 18"></div><div class="field"><label for="yield">추출량 (g)</label><input id="yield" data-keep type="number" inputmode="decimal" step="0.1" placeholder="예: 36"></div></div>
 <div id="yieldGuide" class="output-hint">도징량을 입력하면 권장 추출량이 나와요.</div>
@@ -11,11 +11,11 @@
 </div><div class="col">
 <section class="card">
 <div class="result"><div class="resultbox"><div class="label">추출수율 (Extraction Yield)</div><div class="value" id="ey">—</div></div><div class="resultbox"><div class="label">EBF</div><div class="value" id="ebf">—</div></div></div></section>
-<section class="card noprint"><div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 / PDF 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div></section>
+<section class="card noprint"><div class="actions"><button id="printBtn" class="btn-ghost" type="button">🖨 인쇄 · PDF</button><button id="imgBtn" class="btn-ghost" type="button">🖼 이미지 저장</button><button id="shareBtn" class="btn-ghost" type="button">↗ 공유</button></div></section>
 <section class="card"><div style="font-weight:750">TDS 기준 가이드</div><div class="tdsbar"><div class="track"></div><div class="range-fill" id="rangeFill"></div><div class="marker" id="marker">•<span id="markerLabel"></span></div></div><div class="scale"><span id="minScale">2%</span><span id="maxScale">17%</span></div><div class="status" id="tdsStatus">TDS를 입력하면 기준 범위와 비교해 드려요.</div><div class="small">에스프레소 TDS 기준: 8~11%</div></section>
 <section class="card"><div style="font-weight:750;margin-bottom:8px">기준값</div><div class="small">에스프레소: 1:2 · 리스트레또: 1:1 · 룽고: 1:3</div><div class="small">TDS: 8~11%</div><div class="small">추출시간: 20~30 sec</div><div class="small">추출량 허용범위: 권장량 ±3g</div></section>
 </div></div>
-<script src="common.js"></script><script src="machine.js"></script>
+<script src="common.js?v=20261027b"></script><script src="sheet.js?v=20261027b"></script><script src="machine.js?v=20261027b"></script>
 <script>
 /* 공유: 결과 요약 문구 (common.js가 호출) */
 window.ShareHook=function(){
@@ -28,5 +28,20 @@ window.ShareHook=function(){
   if(g('ebf').textContent.trim()!=='—')b.push('EBF '+g('ebf').textContent.trim());
   if(b.length)L.push(b.join(' · '));
   return L;
+};
+
+/* 결과지 이미지: 이미지에 담을 내용 (sheet.js가 그림) */
+window.SheetHook=function(){
+  const g=id=>document.getElementById(id),v=id=>g(id).value.trim(),sel=g('type'),txt=id=>g(id).textContent.trim();
+  const dose=parseFloat(v('dose')),yld=parseFloat(v('yield')),tds=parseFloat(v('tds'));
+  const items=[{label:'추출수율',value:txt('ey')},{label:'EBF',value:txt('ebf')}];
+  if(dose>0&&yld>0)items.push({label:'추출 비율',value:'1 : '+(yld/dose).toFixed(2)});
+  const info=[sel.options[sel.selectedIndex].text];
+  if(dose>0)info.push('도징 '+dose+' g');if(yld>0)info.push('추출 '+yld+' g');if(v('time'))info.push(v('time')+' 초');
+  const lines=[{text:info.join(' · ')}];
+  {const e=txt('timeStatus');if(e&&!/입력하면/.test(e))lines.push({text:e})}
+  const card=[{t:'metrics',items},{t:'lines',lines}];
+  if(tds>0)card.push({t:'gauge',title:'TDS',min:2,max:17,lo:8,hi:11,value:tds});
+  return[card];
 };
 </script></main></body></html>
