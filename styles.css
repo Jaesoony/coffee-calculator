@@ -177,3 +177,20 @@ table.data td:first-child,table.data th:first-child{text-align:left}
   .actions{max-width:560px}
   .ab-in{max-width:640px;grid-template-columns:1fr 1.7fr}
 }
+
+/* 분쇄도 변환 */
+.gout{background:#f6f6f6;border-radius:14px;padding:14px 16px;margin:2px 0 12px;min-height:20px}
+.ghint{font-size:13px;color:#777;line-height:1.5}
+.gmain{font-size:22px;font-weight:600;color:#333}
+.gmain b{font-size:34px;font-weight:800;color:#111}
+.grange{font-size:14px;font-weight:700;color:#444;margin-top:2px}
+.gsub{font-size:12px;color:#777;margin-top:6px;line-height:1.5}
+.gnotes{margin:8px 0 0 16px;padding:0;font-size:12px;color:#8a5a00;line-height:1.6}
+.gbtns{display:flex;gap:8px;margin-bottom:10px}
+.gbtns button{flex:1 1 0;min-width:0;min-height:44px;font-size:14px}
+.gbtns #gDel{flex:0 0 76px;color:#c53b30}
+.gform{margin:2px 0 12px}
+.gform summary{cursor:pointer;font-weight:700;font-size:14px;color:#444;padding:8px 0}
+.calrow{display:grid;grid-template-columns:76px 1fr auto 1fr;gap:6px;align-items:center;margin-bottom:8px;font-size:12px;color:#666}
+.calrow input{height:42px;padding:0 6px;font-size:16px;text-align:center}
+.calrow .ar{white-space:nowrap}
