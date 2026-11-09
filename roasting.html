@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css?v=20261104a"><title>로스팅 계산기</title></head><body><main class="wrap wrap-flex has-bar"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>🔥 로스팅 계산기</h1></header>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111"><link rel="stylesheet" href="styles.css?v=20261105a"><title>로스팅 계산기</title></head><body><main class="wrap wrap-flex has-bar"><header class="topbar"><a class="tb-home" href="index.html" aria-label="홈으로">🏠 홈</a><h1>🔥 로스팅 계산기</h1></header>
 
 <!-- 입력 화면 -->
 <div id="inputView">
@@ -25,8 +25,9 @@
 <div class="rowbtns one"><button id="addCtl" type="button">+ 조절 추가</button></div>
 </section>
 
-<section class="card"><h2>1분 간격 기록</h2>
-<div class="small" style="margin:-6px 0 12px">1분마다 온도를 입력하세요. ROR은 Drum 온도로 계산해요.</div>
+<section class="card"><h2 id="rtTitle">1분 간격 기록</h2>
+<div class="stepbar"><span>기록 간격</span><div class="stepseg" role="group" aria-label="기록 간격"><button id="st60" type="button" aria-pressed="true">1분</button><button id="st30" type="button" aria-pressed="false">30초</button></div><input type="hidden" id="stepVal" value="60" data-keep></div>
+<div id="rtHint" class="small" style="margin:0 0 12px">1분마다 온도를 입력하세요. ROR은 Drum 온도로 계산해요.</div>
 <div id="rtable" class="rtable"></div>
 <div class="rowbtns"><button id="addRow" type="button">+ 1분 추가</button><button id="delRow" type="button">− 마지막 줄 삭제</button></div>
 </section>
@@ -55,7 +56,7 @@
 <section class="card pr4"><h2>이벤트 요약</h2><div id="evTable"></div></section>
 </div>
 <div class="page" id="page2">
-<section class="card pr3"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. (터닝 포인트 이후)</div></section>
+<section class="card pr3"><h2>ROR 표</h2><div id="rorTable"></div><div class="chart-note">ROR = 직전 1분 대비 Drum 온도 변화 (°C/min, 정각 기준)</div><div class="chart-note"><span class="ror-flag">빨간 굵은 숫자</span>는 직전 1분보다 ROR이 올라간 구간이에요. (터닝 포인트 이후)</div></section>
 </div>
 <div class="page" id="page3">
 <section class="card pr2"><h2>로스팅 프로파일</h2><div id="chart" class="chart-box"></div><div id="chartNote" class="chart-note"></div><div class="chart-note">실선 Drum · 점선 Exhaust / TP 터닝 · YP 옐로 · 1st 1차 크랙 · 2nd 2차 크랙 · Out 배출</div><div class="chart-note">아래 그래프: <b style="color:#d9480f">주황 계단</b> Fire · <b style="color:#1c7ed6">파란 점</b> Damper (눈금에 맞게 자동 조정, 점 위 숫자는 입력값)<span class="noprint"> · 스마트폰을 가로로 돌리면 더 크게 볼 수 있어요.</span></div></section>
@@ -80,4 +81,4 @@
 <div id="pager" class="pager" hidden><button id="prevBtn" type="button" aria-label="이전">‹</button><div id="dots" class="dots"></div><button id="nextBtn" type="button" aria-label="다음">›</button></div>
 </div>
 
-<script src="common.js?v=20261104a"></script><script src="sheet.js?v=20261104a"></script><script src="roasting.js?v=20261104a"></script></main></body></html>
+<script src="common.js?v=20261105a"></script><script src="sheet.js?v=20261105a"></script><script src="roasting.js?v=20261105a"></script></main></body></html>

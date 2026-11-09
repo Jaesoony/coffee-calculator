@@ -1,7 +1,7 @@
 const $=id=>document.getElementById(id);
 
 /* ---------- 기준값 (세로축 60~250°C, 가로축은 입력 길이에 맞춤) ---------- */
-const X_FIT_MIN=5,Y_MIN=60,Y_MAX=250,START_ROWS=13,MAX_ROWS=31; // 0:00~12:00 13줄, 최대 30:00
+const X_FIT_MIN=5,Y_MIN=60,Y_MAX=250; // 기록 줄: 1분 간격 0:00~12:00(13줄) / 30초 간격 0:00~12:00(25줄), 최대 30:00
 const FIRE_C='#d9480f',DAMP_C='#1c7ed6';
 const EVENTS=[
   {k:'tp',name:'Turning P',short:'TP',color:'#2368b2',req:true},
@@ -11,7 +11,7 @@ const EVENTS=[
   {k:'out',name:'배출 Output',short:'Out',color:'#111',req:true}
 ];
 const BASIC=[['agWB','Agtron WB'],['agRGB','Agtron RGB'],['wIn','투입 무게'],['wOut','배출 무게'],['inFire','투입 화력'],['inDamper','투입 Damper'],['inTemp','투입 온도']];
-let rows=0,current=null;
+let rows=0,current=null,step=60;   // step: 온도 기록 간격(초) — 60(기본) 또는 30
 
 /* ---------- 입력 해석 ---------- */
 // "8:30" 또는 "830" → 510초, "057" → 57초. 1~2자리 숫자는 분으로 본다. 잘못된 값은 NaN.
@@ -38,16 +38,39 @@ function buildEvents(){
   }).join('');
 }
 
-/* ---------- 1분 간격 입력 표 (Exhaust / Drum) ---------- */
+/* ---------- 온도 기록 표 (Exhaust / Drum) — 간격은 1분(기본) 또는 30초 ---------- */
+const maxRows=()=>Math.floor(1800/step)+1,startRows=()=>step===60?13:25;
 const cell=(r,k)=>document.querySelector(`#rtable input[data-r="${r}"][data-k="${k}"]`);
 function addRow(){
-  if(rows>=MAX_ROWS)return;
+  if(rows>=maxRows())return;
   const r=rows,d=document.createElement('div');d.className='trow';
   const f=(k,name,unit,req)=>`<label class="tcell"><span class="tl">${name}${req?'<b class="req">*</b>':''}<i>${unit}</i></span><input data-k="${k}" data-r="${r}" type="number" inputmode="decimal" step="any"></label>`;
-  d.innerHTML=`<div class="tmin">${r}:00</div>`+f('ex','Exhaust','°C · 선택',false)+f('dr','Drum','°C',true);
+  d.innerHTML=`<div class="tmin">${fmt(r*step)}</div>`+f('ex','Exhaust','°C · 선택',false)+f('dr','Drum',(r*step)%60===0?'°C':'°C · 선택',(r*step)%60===0);
   $('rtable').appendChild(d);rows++;
 }
 function delRow(){if(rows<=1)return;$('rtable').lastElementChild.remove();rows--}
+// 기록 간격 전환: 입력해 둔 값은 같은 시각의 줄로 옮긴다. (1분으로 돌아갈 때 30초 줄의 값만 사라진다)
+function snapshotRows(){const m={};document.querySelectorAll('#rtable input[data-k]').forEach(el=>{if(el.value==='')return;const s=(+el.dataset.r)*step;(m[s]=m[s]||{})[el.dataset.k]=el.value});return m}
+const hasHalfValues=()=>Object.keys(snapshotRows()).some(s=>s%60!==0);
+function syncStepUI(){
+  $('st60').setAttribute('aria-pressed',step===60);$('st30').setAttribute('aria-pressed',step===30);
+  const lbl=step===60?'1분':'30초';$('rtTitle').textContent=lbl+' 간격 기록';$('addRow').textContent='+ '+lbl+' 추가';
+  $('rtHint').textContent=step===60?'1분마다 온도를 입력하세요. ROR은 Drum 온도로 계산해요.':'30초마다 온도를 입력하세요. ROR은 그대로 1분 단위(정각 기준)로 계산해요. 0:30처럼 반 칸은 선택이에요.';
+  $('stepVal').value=String(step);
+}
+function setStep(n){
+  n=n===30?30:60;if(n===step)return;
+  const snap=snapshotRows();step=n;$('rtable').innerHTML='';rows=0;
+  const secs=Object.keys(snap).map(Number).filter(s=>s%step===0),need=Math.max(startRows(),secs.length?Math.max(...secs)/step+1:0);
+  for(let i=0;i<need&&i<maxRows();i++)addRow();
+  secs.forEach(s=>{['ex','dr'].forEach(k=>{const el=cell(s/step,k);if(el&&snap[s][k]!==undefined)el.value=snap[s][k]})});
+  syncStepUI();
+}
+function chooseStep(n){
+  if(n===step)return;
+  if(n===60&&hasHalfValues()&&!confirm('30초 단위로 입력한 값(0:30, 1:30 …)은 1분 단위에서는 사라져요. 계속할까요?'))return;
+  setStep(n);$('stepVal').dispatchEvent(new Event('change',{bubbles:true}));
+}
 
 /* ---------- Fire / Damper 조절 (바꾼 순간만, 시간 + 항목 + 값) ---------- */
 function addCtl(focus){
@@ -71,17 +94,20 @@ const valueAt=(s,t)=>{let v=s[0][1];for(const p of s){if(p[0]<=t)v=p[1];else bre
 /* ---------- 수집·계산 ---------- */
 function collect(){
   const list=[];
-  for(let r=0;r<rows;r++)list.push({min:r,ex:num(cell(r,'ex')),dr:num(cell(r,'dr')),ror:NaN,flag:false});
-  for(let r=1;r<list.length;r++){if(ok(list[r].dr)&&ok(list[r-1].dr))list[r].ror=list[r].dr-list[r-1].dr} // 1분 간격 → °C/min
+  for(let r=0;r<rows;r++)list.push({sec:r*step,min:r*step/60,ex:num(cell(r,'ex')),dr:num(cell(r,'dr')),ror:NaN,flag:false});
+  // ROR은 항상 1분 단위: 정각(0:00, 1:00 …)에 적은 Drum 온도끼리의 차이(°C/min). 30초 간격으로 적어도 기준은 같다.
+  const byMin={};list.forEach(x=>{if(x.sec%60===0)byMin[x.sec/60]=x});
+  Object.keys(byMin).forEach(k=>{const m=+k,x=byMin[m],q=byMin[m-1];if(m>=1&&q&&ok(x.dr)&&ok(q.dr))x.ror=x.dr-q.dr});
   const ev={};
   EVENTS.forEach(e=>{ev[e.k]={t:parseTime($(e.k+'_t').value),c:num($(e.k+'_c')),raw:$(e.k+'_t').value.trim()}});
   // ROR이 직전 1분보다 올라간 구간 표시 (터닝 포인트 이전 구간은 제외)
   const p=ok(ev.tp.t)?Math.ceil(ev.tp.t/60):1;
-  for(let r=p+2;r<list.length;r++){if(ok(list[r].ror)&&ok(list[r-1].ror)&&list[r].ror>list[r-1].ror)list[r].flag=true}
+  const topMin=Math.max(0,...Object.keys(byMin).map(Number));
+  for(let m=p+2;m<=topMin;m++){const x=byMin[m],q=byMin[m-1];if(x&&q&&ok(x.ror)&&ok(q.ror)&&x.ror>q.ror)x.flag=true}
   // Fire / Damper 시계열: 0초(투입 설정) + 이후 조절
   const ctl=readCtl().filter(c=>ok(c.t)&&ok(c.v));
   const mk=(k,init)=>[[0,init]].concat(ctl.filter(c=>c.k===k).sort((a,b)=>a.t-b.t).map(c=>[c.t,c.v]));
-  return{list,ev,fire:mk('fire',num($('inFire'))),damper:mk('damper',num($('inDamper'))),
+  return{list,ev,step,fire:mk('fire',num($('inFire'))),damper:mk('damper',num($('inDamper'))),
     wIn:num($('wIn')),wOut:num($('wOut')),agWB:num($('agWB')),agRGB:num($('agRGB')),inTemp:num($('inTemp'))};
 }
 function summarize(d){
@@ -129,10 +155,10 @@ function checkRequired(){
     if(prob.length)cl.push(`${c.i}번째(${prob.join(', ')})`);
   });
   if(cl.length)lines.push(`Fire/Damper 조절: ${cl.join(', ')}`);
-  // 1분 간격 기록: 배출 시간의 분(예: 10:30이면 10분)까지 Drum 필수, Exhaust는 선택
-  const outT=parseTime($('out_t').value),last=ok(outT)?Math.min(rows-1,Math.floor(outT/60)):0,m=[];
-  for(let r=0;r<=last;r++){if(empty(cell(r,'dr'))){mark(cell(r,'dr'));m.push(r)}}
-  if(m.length)lines.push(`1분 간격 기록 Drum 온도: ${ranges(m)}`);
+  // 온도 기록: 배출 시간의 분(예: 10:30이면 10분)까지 정각 줄의 Drum 필수, Exhaust와 30초 반 칸은 선택
+  const outT=parseTime($('out_t').value),lastMin=ok(outT)?Math.floor(outT/60):0,m=[];
+  for(let r=0;r<rows;r++){const sec=r*step;if(sec%60||sec/60>lastMin)continue;if(empty(cell(r,'dr'))){mark(cell(r,'dr'));m.push(sec/60)}}
+  if(m.length)lines.push(`온도 기록 Drum 온도: ${ranges(m)}`);
   const msg=$('msg');
   if(lines.length){msg.innerHTML='<b>아직 입력되지 않았거나 확인이 필요한 항목이 있어요</b>'+lines.map(l=>'· '+l).join('<br>');msg.hidden=false;msg.scrollIntoView({block:'center',behavior:'smooth'});return false}
   msg.hidden=true;return true;
@@ -142,12 +168,12 @@ function checkRequired(){
 const f1=n=>ok(n)?n.toFixed(1):'';
 function renderROR(d){
   let last=-1;d.list.forEach((x,i)=>{if(ok(x.dr)||ok(x.ex))last=i});
-  if(last<0){$('rorTable').innerHTML='<div class="small">1분 간격 기록이 입력되지 않았어요.</div>';return}
+  if(last<0){$('rorTable').innerHTML='<div class="small">온도 기록이 입력되지 않았어요.</div>';return}
   let h='<table class="data"><tr><th>시간</th><th>Exhaust</th><th>Drum</th><th>Fire / Damper</th><th>ROR</th></tr>';
   for(let i=0;i<=last;i++){
-    const x=d.list[i],fd=`${nf(valueAt(d.fire,x.min*60))} / ${nf(valueAt(d.damper,x.min*60))}`;
+    const x=d.list[i],fd=`${nf(valueAt(d.fire,x.sec))} / ${nf(valueAt(d.damper,x.sec))}`;
     const txt=ok(x.ror)?`${x.ror>0?'+':''}${x.ror.toFixed(1)}`:'';
-    h+=`<tr><td>${x.min}:00</td><td>${f1(x.ex)}</td><td>${f1(x.dr)}</td><td>${fd}</td><td>${x.flag?`<span class="ror-flag">${txt}</span>`:txt}</td></tr>`;
+    h+=`<tr><td>${fmt(x.sec)}</td><td>${f1(x.ex)}</td><td>${f1(x.dr)}</td><td>${fd}</td><td>${x.flag?`<span class="ror-flag">${txt}</span>`:txt}</td></tr>`;
   }
   $('rorTable').innerHTML=h+'</table>';
 }
@@ -244,6 +270,7 @@ function chartSVG(W,H,d){
     s+=`<line x1="${sx(x)}" y1="${mt}" x2="${sx(x)}" y2="${mt+phM}" stroke="#e6e6e6"/><line x1="${sx(x)}" y1="${subTop}" x2="${sx(x)}" y2="${subTop+phS}" stroke="#e6e6e6"/>`;
     if(x%xLab===0)s+=`<text x="${sx(x)}" y="${subTop+phS+15}" font-size="11" fill="#555" text-anchor="middle">${x}</text>`;
   }
+  if(d.step===30){for(let x=0.5;x<xMax;x+=1){s+=`<line x1="${sx(x)}" y1="${mt}" x2="${sx(x)}" y2="${mt+phM}" stroke="#f0f0f0"/><line x1="${sx(x)}" y1="${subTop}" x2="${sx(x)}" y2="${subTop+phS}" stroke="#f0f0f0"/>`}}   // 30초 눈금
   for(let y=yMin;y<=yMax;y+=10){s+=`<line x1="${ml}" y1="${syM(y)}" x2="${ml+pw}" y2="${syM(y)}" stroke="${y%50===0?'#d2d2d2':'#ececec'}"/>`;if((y-yMin)%yLab===0)s+=`<text x="${ml-6}" y="${syM(y)+4}" font-size="11" fill="#555" text-anchor="end">${y}</text>`}
   [0,subMax/2,subMax].forEach(v=>{s+=`<line x1="${ml}" y1="${syS(v)}" x2="${ml+pw}" y2="${syS(v)}" stroke="#ececec"/><text x="${ml-6}" y="${syS(v)+4}" font-size="10" fill="#777" text-anchor="end">${+v.toFixed(1)}</text>`});
   s+=`<rect x="${ml}" y="${mt}" width="${pw}" height="${phM}" fill="none" stroke="#999"/><rect x="${ml}" y="${subTop}" width="${pw}" height="${phS}" fill="none" stroke="#999"/>`;
@@ -327,17 +354,18 @@ function updateDots(){
   $('dots').innerHTML=Array.from({length:n},(_,i)=>`<span class="dot${i===idx?' on':''}"></span>`).join('');
   $('prevBtn').disabled=idx<=0;$('nextBtn').disabled=idx>=n-1;
 }
-function step(dir){const box=$('pages');box.scrollBy({left:dir*box.clientWidth,behavior:'smooth'})}
+function slide(dir){const box=$('pages');box.scrollBy({left:dir*box.clientWidth,behavior:'smooth'})}
 
 /* ---------- 임시저장: 1분 기록·조절처럼 동적인 칸도 함께 저장/복원 (common.js가 호출) ---------- */
 window.DraftHooks={
   collect(){
-    return{rows,
+    return{rows,step,
       table:Array.from(document.querySelectorAll('#rtable input[data-k]')).filter(el=>el.value!=='').map(el=>[+el.dataset.r,el.dataset.k,el.value]),
       ctl:readCtl().map(c=>({t:c.tE.value,k:c.k,v:c.vE.value}))};
   },
   apply(x){
-    while(rows<x.rows&&rows<MAX_ROWS)addRow();
+    setStep(x.step||60);
+    while(rows<x.rows&&rows<maxRows())addRow();
     while(rows>x.rows&&rows>1)delRow();
     document.querySelectorAll('#rtable input[data-k]').forEach(el=>{el.value=''});
     (x.table||[]).forEach(([r,k,v])=>{const el=cell(r,k);if(el)el.value=v});
@@ -370,7 +398,7 @@ window.SheetHook=function(){
     {name:'Development phase',ko:'DT',pct:r.dtp,time:fmt(t.out.t-t.c1.t),tgt:20}]});
   const cards=[top,[{t:'chart',title:'로스팅 프로파일',svg:chartSVG(400,440,d).svg,w:400,h:440}]];
   const last=[];
-  const ror=d.list.filter(x=>ok(x.ror)).map(x=>({label:x.min+'분',value:(x.ror>0?'+':'')+x.ror.toFixed(1),flag:x.flag}));
+  const ror=d.list.filter(x=>ok(x.ror)).map(x=>({label:Math.round(x.min)+'분',value:(x.ror>0?'+':'')+x.ror.toFixed(1),flag:x.flag}));
   if(ror.length)last.push({t:'strip',title:'ROR (°C/min)',items:ror,perRow:10,note:'빨간 굵은 숫자: 직전 1분보다 ROR이 올라간 구간'});
   const rows=EVENTS.filter(e=>ok(t[e.k].t)||ok(t[e.k].c)).map(e=>[e.name,ok(t[e.k].t)?fmt(t[e.k].t):'—',ok(t[e.k].c)?t[e.k].c.toFixed(1)+'°C':'—']);
   if(ok(d.inTemp))rows.push(['투입','0:00',d.inTemp.toFixed(1)+'°C']);
@@ -380,7 +408,9 @@ window.SheetHook=function(){
 };
 
 /* ---------- 이벤트 연결 ---------- */
-buildEvents();for(let i=0;i<START_ROWS;i++)addRow();
+buildEvents();for(let i=0;i<startRows();i++)addRow();
+$('st60').addEventListener('click',()=>chooseStep(60));$('st30').addEventListener('click',()=>chooseStep(30));
+$('stepVal').addEventListener('change',()=>setStep(parseInt($('stepVal').value,10)===30?30:60));   // 마지막 입력값·임시저장 복원 시
 // 시간 칸(이벤트·조절 공통): 칸을 벗어나면 분:초로 정리 (057 → 0:57)
 document.addEventListener('focusout',e=>{const el=e.target;if(el.classList&&el.classList.contains('tin')){const s=parseTime(el.value);if(ok(s))el.value=fmt(s)}});
 document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('miss','bad')});
@@ -390,7 +420,7 @@ $('addCtl').addEventListener('click',()=>addCtl(true));
 $('addRow').addEventListener('click',addRow);$('delRow').addEventListener('click',delRow);
 $('calcBtn').addEventListener('click',showResults);$('backBtn').addEventListener('click',showInput);
 $('modeScroll').addEventListener('click',()=>setMode('scroll'));$('modeSwipe').addEventListener('click',()=>setMode('swipe'));
-$('prevBtn').addEventListener('click',()=>step(-1));$('nextBtn').addEventListener('click',()=>step(1));
+$('prevBtn').addEventListener('click',()=>slide(-1));$('nextBtn').addEventListener('click',()=>slide(1));
 $('pages').addEventListener('scroll',updateDots);
 if('ResizeObserver' in window)new ResizeObserver(drawChart).observe($('chart'));
 window.addEventListener('resize',drawChart);

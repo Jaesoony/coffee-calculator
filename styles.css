@@ -194,3 +194,10 @@ table.data td:first-child,table.data th:first-child{text-align:left}
 .calrow{display:grid;grid-template-columns:76px 1fr auto 1fr;gap:6px;align-items:center;margin-bottom:8px;font-size:12px;color:#666}
 .calrow input{height:42px;padding:0 6px;font-size:16px;text-align:center}
 .calrow .ar{white-space:nowrap}
+
+/* 온도 기록 간격 선택 (1분 / 30초) */
+.stepbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-2px 0 12px}
+.stepbar>span{font-size:13px;font-weight:700;color:#444}
+.stepseg{display:flex;border:1px solid #ddd;border-radius:11px;overflow:hidden;background:#fff}
+.stepseg button{width:auto;min-height:38px;margin:0;padding:0 18px;border-radius:0;background:#fff;color:#666;font-size:14px;font-weight:700}
+.stepseg button[aria-pressed="true"]{background:#111;color:#fff}
