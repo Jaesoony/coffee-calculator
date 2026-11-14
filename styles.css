@@ -201,3 +201,7 @@ table.data td:first-child,table.data th:first-child{text-align:left}
 .stepseg{display:flex;border:1px solid #ddd;border-radius:11px;overflow:hidden;background:#fff}
 .stepseg button{width:auto;min-height:38px;margin:0;padding:0 18px;border-radius:0;background:#fff;color:#666;font-size:14px;font-weight:700}
 .stepseg button[aria-pressed="true"]{background:#111;color:#fff}
+
+/* 메인: 방문 횟수 */
+.visit{margin-top:14px;padding:12px 14px;background:#fff7ec;border-radius:12px;font-size:13px;line-height:1.7;color:#6b4a1d;text-align:center}
+.visit b{font-size:17px;color:#c0540a}
